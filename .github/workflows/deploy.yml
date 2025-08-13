@@ -1,13 +1,10 @@
-name: Deploy TCA Website to AWS S3
+name: Deploy to AWS S3 and CloudFront
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ master, main ]
   pull_request:
-    branches: [ main, master ]
-
-env:
-  AWS_REGION: us-east-1
+    branches: [ master, main ]
 
 jobs:
   deploy:
@@ -16,53 +13,36 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-
+      
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '20'
         cache: 'npm'
-
+        
     - name: Install dependencies
       run: npm ci
-
-    - name: Build Next.js app
-      run: npm run build
-
-    - name: Export static files
+      
+    - name: Setup environment variables
+      run: |
+        echo "NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" >> .env.local
+        echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" >> .env.local
+        echo "SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" >> .env.local
+        
+    - name: Build and export
       run: npm run export
-
+      
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.AWS_REGION }}
-
+        aws-region: ${{ secrets.AWS_REGION }}
+        
     - name: Deploy to S3
       run: |
-        # Get the S3 bucket name from environment or use a default
-        BUCKET_NAME="${{ secrets.S3_BUCKET_NAME }}"
-        if [ -z "$BUCKET_NAME" ]; then
-          echo "S3_BUCKET_NAME secret not set, using default"
-          BUCKET_NAME="tca-website"
-        fi
+        aws s3 sync out/ s3://${{ secrets.S3_BUCKET_NAME }} --delete
         
-        # Sync the out directory to S3
-        aws s3 sync out/ s3://$BUCKET_NAME --delete
-        
-        # Create CloudFront invalidation if distribution ID is provided
-        if [ ! -z "${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}" ]; then
-          echo "Creating CloudFront invalidation..."
-          aws cloudfront create-invalidation \
-            --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} \
-            --paths "/*"
-        fi
-
-    - name: Deploy status
+    - name: Invalidate CloudFront
       run: |
-        echo "✅ Deployment completed successfully!"
-        echo "🌐 Website URL: https://${{ secrets.S3_BUCKET_NAME }}.s3-website-${{ env.AWS_REGION }}.amazonaws.com"
-        if [ ! -z "${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}" ]; then
-          echo "🚀 CloudFront Distribution ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}"
-        fi
+        aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
