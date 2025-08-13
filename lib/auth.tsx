@@ -17,8 +17,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // Skip if supabase is not available (build time)
+    if (!supabase) {
+      setLoading(false)
+      return
+    }
+
     // Get initial session
     const getSession = async () => {
+      if (!supabase) return
       const { data: { session } } = await supabase.auth.getSession()
       if (session?.user) {
         await fetchUserProfile(session.user.id)
@@ -44,6 +51,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const fetchUserProfile = async (userId: string) => {
+    if (!supabase) return
+    
     try {
       console.log('Fetching user profile for ID:', userId);
       
@@ -80,6 +89,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signIn = async (email: string, password: string) => {
+    if (!supabase) return { error: { message: 'Supabase not configured' } }
+    
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -98,11 +109,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // You can customize this or prompt the user to enter their company name
         const { error: updateError } = await supabase
           .from('users')
-          .update({ company_name: 'Your Company' }) // Replace with actual company name
+          .update({ company_name: 'Your Company' })
           .eq('id', data.user.id)
         
         if (updateError) {
-          console.warn('Could not update company name:', updateError)
+          console.error('Error updating company name:', updateError)
         }
       }
     }
@@ -111,7 +122,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const signUp = async (email: string, password: string, companyName: string) => {
-    // Attempt signup directly - Supabase will tell us if account exists
+    if (!supabase) return { error: { message: 'Supabase not configured' } }
+    
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -121,55 +133,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
       }
     })
-
-    if (error) {
-      // Handle specific error cases
-      if (error.message.includes('already registered') || 
-          error.message.includes('already exists') ||
-          error.message.includes('User already registered')) {
-        return { 
-          error: { 
-            message: 'An account with this email already exists. Please sign in instead.' 
-          } 
-        }
-      }
-      
-      if (error.message.includes('unconfirmed')) {
-        return { 
-          error: { 
-            message: 'This email is already registered but not confirmed. Please check your email for verification or try logging in.' 
-          } 
-        }
-      }
-      
-      return { error }
-    }
-
-    if (data.user) {
-      // The trigger should have already created the profile with the correct company name
-      // But let's verify and update if needed
-      const { error: profileError } = await supabase
-        .from('users')
-        .update({ company_name: companyName })
-        .eq('id', data.user.id)
-
-      if (profileError) {
-        console.warn('Could not update company name:', profileError)
-        // Don't fail the signup if this fails
-      }
-    }
-
-    return { error: null }
+    
+    return { error }
   }
 
   const signOut = async () => {
+    if (!supabase) return
     await supabase.auth.signOut()
   }
 
   const resetPassword = async (email: string) => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    })
+    if (!supabase) return { error: { message: 'Supabase not configured' } }
+    
+    const { error } = await supabase.auth.resetPasswordForEmail(email)
     return { error }
   }
 
@@ -182,11 +158,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     resetPassword,
   }
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  )
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
 export function useAuth() {

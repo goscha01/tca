@@ -40,7 +40,7 @@ export default function Dashboard() {
   };
 
   const uploadLogo = async () => {
-    if (!logoFile || !user) return;
+    if (!logoFile || !user || !supabase) return;
 
     setUploading(true);
     try {
@@ -77,7 +77,7 @@ export default function Dashboard() {
   };
 
   const updateBusinessLink = async () => {
-    if (!businessLink.trim() || !user) return;
+    if (!businessLink.trim() || !user || !supabase) return;
 
     try {
       const { error } = await supabase
