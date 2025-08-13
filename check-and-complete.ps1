@@ -86,26 +86,37 @@ Write-Host "Completing setup for bucket: $SelectedBucket" -ForegroundColor Green
 
 # Complete the setup for selected bucket
 Write-Host "Configuring S3 bucket website..." -ForegroundColor Yellow
-$websiteConfig = '{"IndexDocument":{"Suffix":"index.html"},"ErrorDocument":{"Key":"404.html"}}'
-$websiteConfig | Out-File -FilePath "website-config.json" -Encoding UTF8 -NoNewline
+
+# Create website config JSON
+$websiteConfig = @{
+    IndexDocument = @{Suffix = "index.html"}
+    ErrorDocument = @{Key = "404.html"}
+} | ConvertTo-Json -Compress
+
+# Write to file with UTF8 encoding (no BOM)
+[System.IO.File]::WriteAllText("website-config.json", $websiteConfig, [System.Text.UTF8Encoding]::new($false))
+
 aws s3api put-bucket-website --bucket $SelectedBucket --website-configuration file://website-config.json
 
 Write-Host "Setting bucket policy..." -ForegroundColor Yellow
-$bucketPolicy = @"
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "PublicReadGetObject",
-            "Effect": "Allow",
-            "Principal": "*",
-            "Action": "s3:GetObject",
-            "Resource": "arn:aws:s3:::$SelectedBucket/*"
+
+# Create bucket policy JSON
+$bucketPolicy = @{
+    Version = "2012-10-17"
+    Statement = @(
+        @{
+            Sid = "PublicReadGetObject"
+            Effect = "Allow"
+            Principal = "*"
+            Action = "s3:GetObject"
+            Resource = "arn:aws:s3:::$SelectedBucket/*"
         }
-    ]
-}
-"@
-$bucketPolicy | Out-File -FilePath "bucket-policy.json" -Encoding UTF8 -NoNewline
+    )
+} | ConvertTo-Json -Depth 10
+
+# Write to file with UTF8 encoding (no BOM)
+[System.IO.File]::WriteAllText("bucket-policy.json", $bucketPolicy, [System.Text.UTF8Encoding]::new($false))
+
 aws s3api put-bucket-policy --bucket $SelectedBucket --policy file://bucket-policy.json
 
 Write-Host "Enabling bucket versioning..." -ForegroundColor Yellow
@@ -113,59 +124,59 @@ aws s3api put-bucket-versioning --bucket $SelectedBucket --versioning-configurat
 
 Write-Host "Creating CloudFront distribution..." -ForegroundColor Yellow
 $callerReference = Get-Date -Format 'yyyyMMdd-HHmmss'
-$distributionConfig = @"
-{
-    "CallerReference": "$callerReference",
-    "Comment": "TCA Website Distribution",
-    "DefaultRootObject": "index.html",
-    "Origins": {
-        "Quantity": 1,
-        "Items": [
-            {
-                "Id": "S3-$SelectedBucket",
-                "DomainName": "$SelectedBucket.s3.amazonaws.com",
-                "S3OriginConfig": {
-                    "OriginAccessIdentity": ""
+
+# Create CloudFront distribution config JSON
+$distributionConfig = @{
+    CallerReference = $callerReference
+    Comment = "TCA Website Distribution"
+    DefaultRootObject = "index.html"
+    Origins = @{
+        Quantity = 1
+        Items = @(
+            @{
+                Id = "S3-$SelectedBucket"
+                DomainName = "$SelectedBucket.s3.amazonaws.com"
+                S3OriginConfig = @{
+                    OriginAccessIdentity = ""
                 }
             }
-        ]
-    },
-    "DefaultCacheBehavior": {
-        "TargetOriginId": "S3-$SelectedBucket",
-        "ViewerProtocolPolicy": "redirect-to-https",
-        "TrustedSigners": {
-            "Enabled": false,
-            "Quantity": 0
-        },
-        "ForwardedValues": {
-            "QueryString": false,
-            "Cookies": {
-                "Forward": "none"
+        )
+    }
+    DefaultCacheBehavior = @{
+        TargetOriginId = "S3-$SelectedBucket"
+        ViewerProtocolPolicy = "redirect-to-https"
+        TrustedSigners = @{
+            Enabled = $false
+            Quantity = 0
+        }
+        ForwardedValues = @{
+            QueryString = $false
+            Cookies = @{
+                Forward = "none"
             }
-        },
-        "MinTTL": 0,
-        "DefaultTTL": 86400,
-        "MaxTTL": 31536000
-    },
-    "Enabled": true,
-    "PriceClass": "PriceClass_100"
-}
-"@
+        }
+        MinTTL = 0
+        DefaultTTL = 86400
+        MaxTTL = 31536000
+    }
+    Enabled = $true
+    PriceClass = "PriceClass_100"
+} | ConvertTo-Json -Depth 10
 
-$distributionConfig | Out-File -FilePath "cloudfront-distribution.json" -Encoding UTF8 -NoNewline
-aws cloudfront create-distribution --distribution-config file://cloudfront-distribution.json | Out-File -FilePath "cloudfront-response.json" -Encoding UTF8
+# Write to file with UTF8 encoding (no BOM)
+[System.IO.File]::WriteAllText("cloudfront-distribution.json", $distributionConfig, [System.Text.UTF8Encoding]::new($false))
 
-# Extract CloudFront distribution ID and domain
-$cloudfrontResponse = Get-Content "cloudfront-response.json" | ConvertFrom-Json
-$DistributionId = $cloudfrontResponse.Distribution.Id
-$CloudFrontDomain = $cloudfrontResponse.Distribution.DomainName
+# Create distribution and capture output
+$cloudfrontResponse = aws cloudfront create-distribution --distribution-config file://cloudfront-distribution.json
+$DistributionId = ($cloudfrontResponse | ConvertFrom-Json).Distribution.Id
+$CloudFrontDomain = ($cloudfrontResponse | ConvertFrom-Json).Distribution.DomainName
 
 Write-Host "CloudFront Distribution ID: $DistributionId" -ForegroundColor Green
 Write-Host "CloudFront Domain: $CloudFrontDomain" -ForegroundColor Green
 
 # Clean up temporary files
 Write-Host "Cleaning up temporary files..." -ForegroundColor Yellow
-Remove-Item "website-config.json", "bucket-policy.json", "cloudfront-distribution.json", "cloudfront-response.json" -ErrorAction SilentlyContinue
+Remove-Item "website-config.json", "bucket-policy.json", "cloudfront-distribution.json" -ErrorAction SilentlyContinue
 
 Write-Host ""
 Write-Host "✅ Setup Complete!" -ForegroundColor Green
