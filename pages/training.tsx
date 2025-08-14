@@ -142,7 +142,7 @@ export default function Training() {
           <div className="text-center py-12">
             <BookOpen className="mx-auto h-16 w-16 text-gray-400 mb-4" />
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Join THSA to Access Full Training Library
+              Join TSA to Access Full Training Library
             </h2>
             <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
               Our training library includes courses on advanced cleaning techniques, 
@@ -151,7 +151,7 @@ export default function Training() {
             </p>
             <div className="space-x-4">
               <Link href="/login?mode=signup" className="btn-primary">
-                Join THSA Now
+                Join TSA Now
               </Link>
               <a href="/login" className="btn-outline">
                 Sign In

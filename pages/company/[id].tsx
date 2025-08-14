@@ -137,11 +137,11 @@ export default function CompanyProfile() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="text-primary hover:text-primary-dark font-semibold">
-              ← Back to THSA
+              ← Back to TSA
             </Link>
             <div className="flex items-center space-x-2">
               <Shield className="h-6 w-6 text-primary" />
-              <span className="text-sm text-gray-600">THSA Verified Member</span>
+                              <span className="text-sm text-gray-600">TSA Verified Member</span>
             </div>
           </div>
         </div>

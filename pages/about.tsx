@@ -7,17 +7,17 @@ export default function About() {
     {
       icon: Shield,
       title: "Professional credibility boost",
-      description: "Gain instant trust with the official THSA Certified seal and membership status"
+              description: "Gain instant trust with the official TSA Certified seal and membership status"
     },
     {
       icon: Award,
-      title: "Official THSA seal for marketing",
+              title: "Official TSA seal for marketing",
       description: "Display your certification on your website, business cards, uniforms, and social media to show customers you're a verified, trusted provider"
     },
     {
       icon: Users,
       title: "Inclusion in our member directory",
-      description: "Get discovered by potential customers searching for vetted and reliable home service providers"
+              description: "Get discovered by potential customers searching for vetted and reliable service providers"
     },
     {
       icon: Award,
@@ -37,10 +37,10 @@ export default function About() {
       <section className="bg-gradient-to-br from-primary to-primary-dark text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            About Trusted House Services Association
+            About Trusted Services Association
           </h1>
           <p className="text-xl md:text-2xl max-w-3xl mx-auto opacity-90">
-            Promoting trust, transparency, and quality in home services since 2024.
+            Promoting trust, transparency, and quality in services since 2024.
           </p>
         </div>
       </section>
@@ -54,8 +54,8 @@ export default function About() {
               <Shield className="w-10 h-10 text-primary" />
             </div>
             <p className="text-lg text-gray-700 leading-relaxed max-w-3xl mx-auto">
-              The Trusted House Services Association (THSA) is a professional organization dedicated to raising the standards of trust, 
-              transparency, and quality across the home services industry. We help service providers—from cleaners to handymen, landscapers, and beyond—earn recognition, grow their 
+              The Trusted Services Association (TSA) is a professional organization dedicated to raising the standards of trust, 
+              transparency, and quality across the services industry. We help service providers—from cleaners to handymen, landscapers, and beyond—earn recognition, grow their 
               skills, and stand out from the competition.
             </p>
           </div>
@@ -67,7 +67,7 @@ export default function About() {
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Our Mission</h2>
             <p className="text-lg text-gray-700 leading-relaxed max-w-2xl mx-auto">
-              Our mission is to set and uphold the highest standards in home services, ensuring both 
+              Our mission is to set and uphold the highest standards in services, ensuring both 
               clients and professionals benefit from exceptional service, integrity, and reliability.
             </p>
           </div>
@@ -126,7 +126,7 @@ export default function About() {
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2">Community</h3>
                 <p className="text-gray-600 text-sm">
-                  Supporting and connecting home service professionals across multiple industries to share knowledge and grow together
+                  Supporting and connecting service professionals across multiple industries to share knowledge and grow together
                 </p>
               </div>
             </div>
@@ -138,11 +138,11 @@ export default function About() {
               Ready to Join Our Community?
             </h2>
             <p className="text-lg text-gray-600 mb-8">
-              Become part of the Trusted House Services Association and start building your professional reputation today.
+              Become part of the Trusted Services Association and start building your professional reputation today.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/login?mode=signup" className="btn-primary">
-                Join THSA Now
+                Join TSA Now
               </Link>
               <Link href="/contact" className="btn-outline">
                 Contact Us

@@ -699,7 +699,7 @@ export default function Dashboard() {
                             disabled={!isEditing}
                           >
                             <optgroup label="Cleaning & Maintenance">
-                              <option value="Residential cleaning">Residential cleaning</option>
+                              <option value="Cleaning">Cleaning</option>
                               <option value="Commercial/office cleaning">Commercial/office cleaning</option>
                               <option value="Carpet & upholstery cleaning">Carpet & upholstery cleaning</option>
                               <option value="Window washing">Window washing</option>

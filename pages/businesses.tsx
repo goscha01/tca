@@ -80,10 +80,10 @@ export default function Businesses() {
               <Shield className="h-16 w-16 text-primary" />
             </div>
             <h1 className="text-4xl font-bold text-gray-900 mb-4">
-              THSA Business Directory
+              TSA Business Directory
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Discover trusted home service professionals in your area. All businesses listed here are verified THSA members committed to quality and transparency.
+              Discover trusted service professionals in your area. All businesses listed here are verified TSA members committed to quality and transparency.
             </p>
           </div>
         </div>
@@ -271,7 +271,7 @@ export default function Businesses() {
                       <span>Member since {new Date(business.created_at).getFullYear()}</span>
                       <div className="flex items-center space-x-1">
                         <Shield className="w-3 h-3 text-primary" />
-                        <span className="text-primary font-medium">THSA Verified</span>
+                        <span className="text-primary font-medium">TSA Verified</span>
                       </div>
                     </div>
                   </div>

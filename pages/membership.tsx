@@ -8,9 +8,9 @@ export default function Membership() {
       name: "Listed",
       price: "Free",
       period: "forever",
-      description: "For new or small businesses starting out in home services",
+              description: "For new or small businesses starting out in services",
       benefits: [
-        "Business listing in THSA member directory",
+        "Business listing in TSA member directory",
         "Email support"
       ],
       requirements: ["Name", "Address", "Phone number"],
@@ -26,7 +26,7 @@ export default function Membership() {
       description: "For insured or bonded professionals who want credibility",
       benefits: [
         "All Free Listing benefits",
-        "THSA Badge (Insured, Verified)"
+        "TSA Badge (Insured, Verified)"
       ],
       requirements: [
         "Meet all Free requirements",
@@ -44,8 +44,8 @@ export default function Membership() {
       description: "For trusted businesses with a proven public reputation",
       benefits: [
         "All Member benefits",
-        "THSA Verified Badge",
-        "Eligibility for THSA Awards based on customer satisfaction"
+        "TSA Verified Badge",
+        "Eligibility for TSA Awards based on customer satisfaction"
       ],
       requirements: [
         "Meet all Member requirements",
@@ -64,11 +64,11 @@ export default function Membership() {
       benefits: [
         "All Verified benefits",
         "training materials & professional certifications",
-        "Boosted listing position in THSA directory"
+        "Boosted listing position in TSA directory"
       ],
       requirements: [
         "All Verified requirements",
-        "Complete THSA-approved training"
+        "Complete TSA-approved training"
       ],
       popular: false,
       cta: "Start Training",
@@ -80,7 +80,7 @@ export default function Membership() {
   const generalBenefits = [
     {
       icon: Shield,
-      title: "Official THSA Seal for Your Website",
+      title: "Official TSA Seal for Your Website",
       description: "Display the trusted seal to build instant customer confidence"
     },
     {
@@ -107,7 +107,7 @@ export default function Membership() {
       <section className="bg-gradient-to-br from-primary to-primary-dark text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            THSA Membership Tiers
+            TSA Membership Tiers
           </h1>
           <p className="text-xl md:text-2xl mb-8 max-w-4xl mx-auto">
             Choose the perfect membership level for your business. From free listing to certified professional status, 
@@ -216,10 +216,10 @@ export default function Membership() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Why Choose THSA Membership?
+              Why Choose TSA Membership?
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Join thousands of home service professionals who trust THSA for industry recognition, 
+              Join thousands of service professionals who trust TSA for industry recognition, 
               professional development, and business growth.
             </p>
           </div>
@@ -245,8 +245,8 @@ export default function Membership() {
             Ready to Elevate Your Business?
           </h2>
           <p className="text-xl mb-8 opacity-90">
-            Start with our free listing today and discover how THSA membership can transform your business. 
-            Join thousands of professionals who trust THSA for industry recognition and growth.
+                    Start with our free listing today and discover how TSA membership can transform your business.
+        Join thousands of professionals who trust TSA for industry recognition and growth.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link 

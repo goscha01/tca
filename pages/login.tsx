@@ -77,12 +77,12 @@ export default function Login() {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="text-center">
           <h2 className="text-3xl font-bold text-gray-900">
-            {isSignUp ? 'Join THSA' : 'Welcome Back'}
+            {isSignUp ? 'Join TSA' : 'Welcome Back'}
           </h2>
           <p className="mt-2 text-sm text-gray-600">
             {isSignUp 
-              ? 'Create your account to access exclusive THSA benefits'
-              : 'Sign in to your THSA account'
+                      ? 'Create your account to access exclusive TSA benefits'
+        : 'Sign in to your TSA account'
             }
           </p>
           {isSignUp && (

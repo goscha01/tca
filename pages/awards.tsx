@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { Award, Star, Trophy, Users, Calendar, MapPin } from 'lucide-react';
+import Image from 'next/image';
 
 export default function Awards() {
   const [nominationForm, setNominationForm] = useState({
@@ -30,12 +31,12 @@ export default function Awards() {
   const currentWinners = [
     {
       year: "2024",
-      category: "Excellence in Residential Services",
-      winner: "Sparkle Home Services",
+      category: "Excellence in Services",
+      winner: "Sparkle Services",
       location: "New York, NY",
       rating: 4.9,
       reviews: 247,
-      specialty: "Premium residential service solutions"
+      specialty: "Premium service solutions"
     },
     {
       year: "2024",
@@ -49,7 +50,7 @@ export default function Awards() {
     {
       year: "2024",
       category: "Customer Service Champion",
-      winner: "Fresh Start Home Services",
+      winner: "Fresh Start Services",
       location: "Chicago, IL",
       rating: 4.9,
       reviews: 156,
@@ -57,7 +58,7 @@ export default function Awards() {
     },
     {
       year: "2023",
-      category: "Innovation in Home Services",
+      category: "Innovation in Services",
       winner: "Green Home Solutions",
       location: "Austin, TX",
       rating: 4.7,
@@ -68,34 +69,34 @@ export default function Awards() {
 
   const awardCategories = [
     {
-      name: "Excellence in Residential Services",
-      description: "Recognizing outstanding residential home service providers",
-      icon: "🏠"
+      name: "Excellence in Services",
+      description: "Recognizing outstanding service providers",
+      icon: "/award-residential.svg"
     },
     {
       name: "Outstanding Commercial Services",
       description: "Awarding excellence in commercial and industrial service projects",
-      icon: "🏢"
+      icon: "/award-commercial.svg"
     },
     {
       name: "Customer Service Champion",
       description: "Celebrating exceptional customer service and client satisfaction",
-      icon: "🤝"
+      icon: "/award-customer.svg"
     },
     {
-      name: "Innovation in Home Services",
+      name: "Innovation in Services",
       description: "Honoring innovative approaches, techniques, or technologies",
-      icon: "💡"
+      icon: "/award-innovation.svg"
     },
     {
       name: "Sustainability & Green Practices",
       description: "Recognizing eco-friendly and environmentally conscious practices",
-      icon: "🌱"
+      icon: "/award-green.svg"
     },
     {
       name: "Rising Star Award",
       description: "Celebrating new businesses with exceptional potential and early achievements",
-      icon: "⭐"
+      icon: "/award-rising.svg"
     }
   ];
 
@@ -105,14 +106,14 @@ export default function Awards() {
       <section className="bg-gradient-to-br from-primary to-primary-dark text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            THSA Excellence Awards
+            TSA Excellence Awards
           </h1>
           <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto opacity-90">
-            Each year, the Trusted Home Services Association recognizes outstanding home service professionals based on customer reviews, community feedback, and service quality.
+            Each year, the Trusted Services Association recognizes outstanding service professionals based on customer reviews, community feedback, and service quality.
           </p>
           <div className="flex items-center justify-center space-x-2 text-lg">
             <Trophy className="w-6 h-6 text-yellow-300" />
-            <span>Celebrating Excellence Across the Home Services Industry</span>
+            <span>Celebrating Excellence Across the Services Industry</span>
           </div>
         </div>
       </section>
@@ -132,7 +133,15 @@ export default function Awards() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {awardCategories.map((category, index) => (
               <div key={index} className="card text-center hover:shadow-xl transition-shadow">
-                <div className="text-4xl mb-4">{category.icon}</div>
+                <div className="flex justify-center mb-4">
+                  <Image 
+                    src={category.icon} 
+                    alt={category.name} 
+                    width={80} 
+                    height={80} 
+                    className="h-20 w-20"
+                  />
+                </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   {category.name}
                 </h3>
@@ -153,7 +162,7 @@ export default function Awards() {
               Nominate Your Business
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Ready to be recognized? Submit your nomination for the THSA Excellence Awards.
+              Ready to be recognized? Submit your nomination for the TSA Excellence Awards.
             </p>
           </div>
 
@@ -304,7 +313,7 @@ export default function Awards() {
                     <h4 className="font-medium text-blue-900 mb-1">Nomination Fee: $19</h4>
                     <p className="text-sm text-blue-800">
                       The nomination fee covers the review process and evaluation of your business. 
-                      Winners receive a prestigious THSA Excellence Award certificate and recognition.
+                      Winners receive a prestigious TSA Excellence Award certificate and recognition.
                     </p>
                   </div>
                 </div>
@@ -326,41 +335,65 @@ export default function Awards() {
               Current Winners
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Meet our outstanding recipients who exemplify excellence in home services.
+              Meet our outstanding recipients who exemplify excellence in services.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {currentWinners.map((winner, index) => (
-              <div key={index} className="card hover:shadow-xl transition-shadow">
-                <div className="flex items-start space-x-4">
-                  <div className="w-16 h-16 bg-yellow-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <Trophy className="w-8 h-8 text-yellow-600" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <span className="text-sm font-medium text-yellow-600 bg-yellow-100 px-2 py-1 rounded">
-                        {winner.year} Winner
-                      </span>
-                      <span className="text-sm text-gray-500">{winner.category}</span>
+            {currentWinners.map((winner, index) => {
+              // Map winner category to award logo
+              const getAwardLogo = (category: string) => {
+                switch (category) {
+                  case "Excellence in Services":
+                    return "/award-residential.svg";
+                  case "Outstanding Commercial Services":
+                    return "/award-commercial.svg";
+                  case "Customer Service Champion":
+                    return "/award-customer.svg";
+                  case "Innovation in Services":
+                    return "/award-innovation.svg";
+                  default:
+                    return "/award-residential.svg"; // fallback
+                }
+              };
+
+              return (
+                <div key={index} className="card hover:shadow-xl transition-shadow">
+                  <div className="flex items-start space-x-4">
+                    <div className="w-16 h-16 bg-yellow-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Image 
+                        src={getAwardLogo(winner.category)} 
+                        alt={`${winner.category} Award`} 
+                        width={48} 
+                        height={48} 
+                        className="w-12 h-12"
+                      />
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">{winner.winner}</h3>
-                    <div className="flex items-center space-x-4 text-sm text-gray-500 mb-3">
-                      <div className="flex items-center space-x-1">
-                        <MapPin className="w-4 h-4" />
-                        <span>{winner.location}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <span className="text-sm font-medium text-yellow-600 bg-yellow-100 px-2 py-1 rounded">
+                          {winner.year} Winner
+                        </span>
+                        <span className="text-sm text-gray-500">{winner.category}</span>
                       </div>
-                      <div className="flex items-center space-x-1">
-                        <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                        <span>{winner.rating}</span>
-                        <span>({winner.reviews} reviews)</span>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">{winner.winner}</h3>
+                      <div className="flex items-center space-x-4 text-sm text-gray-500 mb-3">
+                        <div className="flex items-center space-x-1">
+                          <MapPin className="w-4 h-4" />
+                          <span>{winner.location}</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Star className="w-4 h-4 text-yellow-400 fill-current" />
+                          <span>{winner.rating}</span>
+                          <span>({winner.reviews} reviews)</span>
+                        </div>
                       </div>
+                      <p className="text-gray-600 text-sm">{winner.specialty}</p>
                     </div>
-                    <p className="text-gray-600 text-sm">{winner.specialty}</p>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -372,14 +405,14 @@ export default function Awards() {
             Ready to Be Recognized?
           </h2>
           <p className="text-xl mb-8 opacity-90">
-            Submit your nomination today and join the ranks of THSA Excellence Award winners.
+            Submit your nomination today and join the ranks of TSA Excellence Award winners.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="#nomination" className="btn-primary bg-white text-secondary hover:bg-gray-100">
               Nominate Your Business
             </Link>
             <Link href="/login?mode=signup" className="btn-outline border-white text-white hover:bg-white hover:text-secondary">
-              Join THSA First
+              Join TSA First
             </Link>
           </div>
         </div>
