@@ -1,6 +1,6 @@
-/** @type {import('next').NextConfig} */
+/** @type {import('next').Config} */
 const nextConfig = {
-  // output: 'export', // Commented out for development server
+  output: 'export', // Enable static export for S3 deployment
   trailingSlash: true,
   images: {
     unoptimized: true

@@ -62,46 +62,60 @@ if ($gitStatus) {
 
 # S3 Upload
 Write-Host "Checking AWS CLI configuration..." -ForegroundColor Yellow
-$awsConfigured = aws sts get-caller-identity 2>$null
 
-if ($awsConfigured) {
-    Write-Host "AWS CLI configured! Proceeding with S3 upload..." -ForegroundColor Green
-    
-    # Get bucket name
-    $bucketName = $env:AWS_S3_BUCKET
-    if (-not $bucketName) {
-        $bucketName = Read-Host "Enter S3 bucket name"
-    }
-    
-    if ($bucketName) {
-        Write-Host "Uploading to S3 bucket: $bucketName" -ForegroundColor Yellow
+# Try to get AWS caller identity to check if CLI is configured
+try {
+    $awsIdentity = aws sts get-caller-identity 2>$null | ConvertFrom-Json
+    if ($awsIdentity -and $awsIdentity.Account) {
+        Write-Host "AWS CLI configured! Account: $($awsIdentity.Account)" -ForegroundColor Green
         
-        # Sync files to S3
-        aws s3 sync "out" "s3://$bucketName" --delete --cache-control "max-age=31536000,public"
+        # Get bucket name from environment
+        $bucketName = $env:AWS_S3_BUCKET
+        if (-not $bucketName) {
+            Write-Host "AWS_S3_BUCKET not found in environment variables" -ForegroundColor Red
+            $bucketName = Read-Host "Enter S3 bucket name"
+        }
         
-        if ($LASTEXITCODE -eq 0) {
-            Write-Host "S3 upload completed successfully!" -ForegroundColor Green
+        if ($bucketName) {
+            Write-Host "Uploading to S3 bucket: $bucketName" -ForegroundColor Yellow
             
-            # Get website URL
-            $region = aws configure get region
-            $websiteUrl = "https://$bucketName.s3-website-$region.amazonaws.com"
-            Write-Host "Website deployed to: $websiteUrl" -ForegroundColor Green
+            # Check if out directory exists
+            if (-not (Test-Path "out")) {
+                Write-Host "Error: 'out' directory not found. Build may have failed." -ForegroundColor Red
+                exit 1
+            }
             
-            # CloudFront invalidation if configured
-            $cloudFrontId = $env:AWS_CLOUDFRONT_DISTRIBUTION_ID
-            if ($cloudFrontId) {
-                Write-Host "Invalidating CloudFront cache..." -ForegroundColor Yellow
-                aws cloudfront create-invalidation --distribution-id $cloudFrontId --paths "/*"
-                Write-Host "CloudFront cache invalidated!" -ForegroundColor Green
+            # Sync files to S3
+            aws s3 sync "out" "s3://$bucketName" --delete --cache-control "max-age=31536000,public"
+            
+            if ($LASTEXITCODE -eq 0) {
+                Write-Host "S3 upload completed successfully!" -ForegroundColor Green
+                
+                # Get website URL
+                $region = aws configure get region
+                $websiteUrl = "https://$bucketName.s3-website-$region.amazonaws.com"
+                Write-Host "Website deployed to: $websiteUrl" -ForegroundColor Green
+                
+                # CloudFront invalidation if configured
+                $cloudFrontId = $env:AWS_CLOUDFRONT_DISTRIBUTION_ID
+                if ($cloudFrontId) {
+                    Write-Host "Invalidating CloudFront cache..." -ForegroundColor Yellow
+                    aws cloudfront create-invalidation --distribution-id $cloudFrontId --paths "/*"
+                    Write-Host "CloudFront cache invalidated!" -ForegroundColor Green
+                }
+            } else {
+                Write-Host "S3 upload failed!" -ForegroundColor Red
             }
         } else {
-            Write-Host "S3 upload failed!" -ForegroundColor Red
+            Write-Host "No bucket name provided. Skipping S3 upload." -ForegroundColor Yellow
         }
     } else {
-        Write-Host "No bucket name provided. Skipping S3 upload." -ForegroundColor Yellow
+        throw "No valid AWS identity returned"
     }
-} else {
-    Write-Host "AWS CLI not configured. Manual S3 upload required." -ForegroundColor Yellow
+} catch {
+    Write-Host "AWS CLI not configured or not working properly." -ForegroundColor Red
+    Write-Host "Error: $($_.Exception.Message)" -ForegroundColor Red
+    Write-Host "Manual S3 upload required." -ForegroundColor Yellow
     Write-Host "Manual steps:" -ForegroundColor Cyan
     Write-Host "1. aws s3 sync out/ s3://your-bucket-name --delete" -ForegroundColor White
     Write-Host "2. Configure S3 bucket for static website hosting" -ForegroundColor White
