@@ -15,12 +15,24 @@
     @apply bg-primary hover:bg-primary-dark text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200;
   }
   
+  .btn-primary:disabled {
+    @apply bg-gray-400 cursor-not-allowed;
+  }
+  
   .btn-secondary {
     @apply bg-secondary hover:bg-secondary-dark text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200;
   }
   
   .btn-outline {
     @apply border-2 border-primary text-primary hover:bg-primary hover:text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200;
+  }
+  
+  .btn-danger {
+    @apply bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200;
+  }
+  
+  .btn-danger:disabled {
+    @apply bg-red-400 cursor-not-allowed;
   }
   
   .card {

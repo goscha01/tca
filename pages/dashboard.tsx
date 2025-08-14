@@ -18,7 +18,8 @@ import {
   Linkedin,
   Save,
   Edit,
-  X
+  X,
+  Trash2
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -64,7 +65,8 @@ export default function Dashboard() {
   const [message, setMessage] = useState('');
   const [profile, setProfile] = useState<BusinessProfile | null>(null);
   const [saving, setSaving] = useState(false);
-  const [newService, setNewService] = useState('');
+  const [deleting, setDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [newSpecialty, setNewSpecialty] = useState('');
   const [newCertification, setNewCertification] = useState('');
   const [isEditing, setIsEditing] = useState(false);
@@ -140,6 +142,11 @@ export default function Dashboard() {
   };
 
   const createLocalDefaultProfile = () => {
+    // Clear any existing blob URLs
+    if (profile?.logo_url && profile.logo_url.startsWith('blob:')) {
+      URL.revokeObjectURL(profile.logo_url);
+    }
+    
     const defaultProfile: Omit<BusinessProfile, 'id'> = {
       name: user?.company_name || 'Your Company',
       description: '',
@@ -188,50 +195,25 @@ export default function Dashboard() {
     }
   };
 
-  const uploadLogo = async () => {
+    const uploadLogo = async () => {
     if (!logoFile || !user) return;
 
     setUploading(true);
     try {
-      // Try to upload to Supabase storage if available
-      if (supabase) {
-        const fileExt = logoFile.name.split('.').pop();
-        const fileName = `${user.id}-logo.${fileExt}`;
-        const filePath = `logos/${fileName}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('tca-assets')
-          .upload(filePath, logoFile);
-
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('tca-assets')
-          .getPublicUrl(filePath);
-
-        if (profile) {
-          setProfile({ ...profile, logo_url: publicUrl });
+      // Convert image to base64 for persistent storage
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const base64String = e.target?.result as string;
+        if (profile && base64String) {
+          setProfile({ ...profile, logo_url: base64String });
+          setMessage('Logo uploaded successfully! Click "Save Profile" to save it permanently.');
         }
-
-        setMessage('Logo uploaded successfully!');
-        setLogoFile(null);
-        return;
-      }
-    } catch (error) {
-      console.error('Upload error:', error);
-    }
-
-    // Fallback to local storage if Supabase is not available or fails
-    try {
-      const localUrl = URL.createObjectURL(logoFile);
-      if (profile) {
-        setProfile({ ...profile, logo_url: localUrl });
-      }
-      setMessage('Logo uploaded successfully! (Local storage)');
+      };
+      reader.readAsDataURL(logoFile);
       setLogoFile(null);
-    } catch (localError) {
+    } catch (error) {
       setMessage('Error uploading logo. Please try again.');
-      console.error('Local upload error:', localError);
+      console.error('Logo upload error:', error);
     } finally {
       setUploading(false);
     }
@@ -239,6 +221,26 @@ export default function Dashboard() {
 
   const handleInputChange = (field: string, value: any) => {
     setProfile(prev => prev ? { ...prev, [field]: value } : null);
+  };
+
+  const getLogoUrl = (logoUrl: string | null) => {
+    if (!logoUrl) return null;
+    // If it's already a base64 string, return as is
+    if (logoUrl.startsWith('data:image/')) return logoUrl;
+    // If it's a blob URL, return null (they're temporary)
+    if (logoUrl.startsWith('blob:')) return null;
+    // Otherwise return the URL as is
+    return logoUrl;
+  };
+
+  const handleSocialMediaChange = (platform: string, value: string) => {
+    setProfile(prev => prev ? {
+      ...prev,
+      social_media: {
+        ...prev.social_media,
+        [platform]: value
+      }
+    } : null);
   };
 
   const handleOperatingHoursChange = (day: string, field: string, value: any) => {
@@ -254,16 +256,6 @@ export default function Dashboard() {
     } : null);
   };
 
-  const handleSocialMediaChange = (platform: string, value: string) => {
-    setProfile(prev => prev ? {
-      ...prev,
-      social_media: {
-        ...prev.social_media,
-        [platform]: value
-      }
-    } : null);
-  };
-
   const addItem = (field: 'services' | 'specialties' | 'certifications', value: string) => {
     if (!value.trim()) return;
     
@@ -272,12 +264,11 @@ export default function Dashboard() {
       [field]: [...prev[field], value.trim()]
     } : null);
     
-    if (field === 'services') setNewService('');
     if (field === 'specialties') setNewSpecialty('');
     if (field === 'certifications') setNewCertification('');
   };
 
-  const removeItem = (field: 'services' | 'specialties' | 'certifications', index: number) => {
+  const removeItem = (field: 'specialties' | 'certifications', index: number) => {
     setProfile(prev => prev ? {
       ...prev,
       [field]: prev[field].filter((_, i) => i !== index)
@@ -330,6 +321,37 @@ export default function Dashboard() {
       console.error('Save error:', error);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const deleteProfile = async () => {
+    if (!profile || !user || !supabase) return;
+
+    setDeleting(true);
+    try {
+      // Only delete if it's a real profile (not a temporary one)
+      if (profile.id && !profile.id.startsWith('temp-')) {
+        const { error } = await supabase
+          .from('businesses')
+          .delete()
+          .eq('user_id', user.id);
+
+        if (error) {
+          console.error('Database error during delete:', error);
+          throw error;
+        }
+      }
+
+      // Clear the profile and create a new default one
+      setProfile(null);
+      createLocalDefaultProfile();
+      setMessage('Profile deleted successfully! A new default profile has been created.');
+      setShowDeleteConfirm(false);
+    } catch (error) {
+      setMessage('Error deleting profile. Please try again.');
+      console.error('Delete error:', error);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -410,12 +432,17 @@ export default function Dashboard() {
               <h2 className="text-xl font-semibold text-gray-900">Company Logo</h2>
             </div>
             
-            {profile?.logo_url ? (
+            {profile?.logo_url && getLogoUrl(profile.logo_url) ? (
               <div className="mb-4">
                 <img 
-                  src={profile.logo_url} 
+                  src={getLogoUrl(profile.logo_url) || ''} 
                   alt="Company Logo" 
                   className="h-20 w-auto rounded-lg border border-gray-200"
+                  onError={(e) => {
+                    // Hide broken images
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                  }}
                 />
               </div>
             ) : (
@@ -472,13 +499,22 @@ export default function Dashboard() {
                       </button>
                     </>
                   ) : (
-                    <button
-                      onClick={() => setIsEditing(true)}
-                      className="btn-primary flex items-center space-x-2"
-                    >
-                      <Edit className="h-5 w-5" />
-                      <span>Edit Profile</span>
-                    </button>
+                    <div className="flex space-x-3">
+                      <button
+                        onClick={() => setIsEditing(true)}
+                        className="btn-primary flex items-center space-x-2"
+                      >
+                        <Edit className="h-5 w-5" />
+                        <span>Edit Profile</span>
+                      </button>
+                      <button
+                        onClick={() => setShowDeleteConfirm(true)}
+                        className="btn-danger flex items-center space-x-2"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                        <span>Delete Profile</span>
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>
@@ -496,7 +532,7 @@ export default function Dashboard() {
                         <input
                           type="text"
                           autoComplete="organization"
-                          value={profile?.name || ''}
+                          value={profile?.name ?? ''}
                           onChange={(e) => handleInputChange('name', e.target.value)}
                           className="input-field"
                           placeholder="Enter company name"
@@ -509,7 +545,7 @@ export default function Dashboard() {
                           Description
                         </label>
                         <textarea
-                          value={profile?.description || ''}
+                          value={profile?.description ?? ''}
                           onChange={(e) => handleInputChange('description', e.target.value)}
                           rows={4}
                           className="input-field"
@@ -527,7 +563,7 @@ export default function Dashboard() {
                           <input
                             type="url"
                             autoComplete="url"
-                            value={profile?.website || ''}
+                            value={profile?.website ?? ''}
                             onChange={(e) => handleInputChange('website', e.target.value)}
                             className="input-field pl-10"
                             placeholder="https://your-website.com"
@@ -651,41 +687,50 @@ export default function Dashboard() {
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           Services Offered
                         </label>
-                        <div className="flex space-x-2 mb-2">
-                          <input
-                            type="text"
-                            value={newService}
-                            onChange={(e) => setNewService(e.target.value)}
-                            className="input-field flex-1"
-                            placeholder="Add a service"
-                            onKeyPress={(e) => e.key === 'Enter' && addItem('services', newService)}
-                            disabled={!isEditing}
-                          />
-                          <button
-                            onClick={() => addItem('services', newService)}
-                            className="btn-primary px-4"
+                        <div className="mb-4">
+                          <select
+                            multiple
+                            value={profile.services}
+                            onChange={(e) => {
+                              const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
+                              setProfile(prev => prev ? { ...prev, services: selectedOptions } : null);
+                            }}
+                            className="input-field min-h-[120px]"
                             disabled={!isEditing}
                           >
-                            Add
-                          </button>
+                            <optgroup label="Cleaning & Maintenance">
+                              <option value="Residential cleaning">Residential cleaning</option>
+                              <option value="Commercial/office cleaning">Commercial/office cleaning</option>
+                              <option value="Carpet & upholstery cleaning">Carpet & upholstery cleaning</option>
+                              <option value="Window washing">Window washing</option>
+                              <option value="Pressure washing">Pressure washing</option>
+                            </optgroup>
+                            <optgroup label="Home Improvement & Repairs">
+                              <option value="Handyman services">Handyman services</option>
+                              <option value="Plumbing">Plumbing</option>
+                              <option value="Electrical services">Electrical services</option>
+                              <option value="HVAC installation & maintenance">HVAC installation & maintenance</option>
+                              <option value="Appliance repair">Appliance repair</option>
+                            </optgroup>
+                            <optgroup label="Outdoor & Property Services">
+                              <option value="Landscaping & lawn care">Landscaping & lawn care</option>
+                              <option value="Tree trimming & removal">Tree trimming & removal</option>
+                              <option value="Snow removal">Snow removal</option>
+                              <option value="Pool cleaning & maintenance">Pool cleaning & maintenance</option>
+                              <option value="Pest control">Pest control</option>
+                            </optgroup>
+                            <optgroup label="Specialized Home Care">
+                              <option value="Deep sanitation & disinfection services">Deep sanitation & disinfection services</option>
+                              <option value="Mold remediation">Mold remediation</option>
+                              <option value="Water damage restoration">Water damage restoration</option>
+                              <option value="Moving assistance (packing/unpacking)">Moving assistance (packing/unpacking)</option>
+                            </optgroup>
+                          </select>
+                          <p className="text-sm text-gray-500 mt-1">
+                            Hold Ctrl (or Cmd on Mac) to select multiple services
+                          </p>
                         </div>
-                        <div className="flex flex-wrap gap-2">
-                          {profile.services.map((service, index) => (
-                            <span
-                              key={index}
-                              className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-primary/10 text-primary"
-                            >
-                              {service}
-                              <button
-                                onClick={() => removeItem('services', index)}
-                                className="ml-2 text-primary hover:text-primary-dark"
-                                disabled={!isEditing}
-                              >
-                                ×
-                              </button>
-                            </span>
-                          ))}
-                        </div>
+
                       </div>
 
                       {/* Specialties */}
@@ -769,6 +814,80 @@ export default function Dashboard() {
                               </button>
                             </span>
                           ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Social Media Profiles */}
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Social Media Profiles</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Facebook
+                        </label>
+                        <div className="relative">
+                          <Facebook className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                          <input
+                            type="url"
+                            value={profile.social_media?.facebook || ''}
+                            onChange={(e) => handleSocialMediaChange('facebook', e.target.value)}
+                            className="input-field pl-10"
+                            placeholder="https://facebook.com/yourpage"
+                            disabled={!isEditing}
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Instagram
+                        </label>
+                        <div className="relative">
+                          <Instagram className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                          <input
+                            type="url"
+                            value={profile.social_media?.instagram || ''}
+                            onChange={(e) => handleSocialMediaChange('instagram', e.target.value)}
+                            className="input-field pl-10"
+                            placeholder="https://instagram.com/yourpage"
+                            disabled={!isEditing}
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Twitter
+                        </label>
+                        <div className="relative">
+                          <Twitter className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                          <input
+                            type="url"
+                            value={profile.social_media?.twitter || ''}
+                            onChange={(e) => handleSocialMediaChange('twitter', e.target.value)}
+                            className="input-field pl-10"
+                            placeholder="https://twitter.com/yourpage"
+                            disabled={!isEditing}
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          LinkedIn
+                        </label>
+                        <div className="relative">
+                          <Linkedin className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                          <input
+                            type="url"
+                            value={profile.social_media?.linkedin || ''}
+                            onChange={(e) => handleSocialMediaChange('linkedin', e.target.value)}
+                            className="input-field pl-10"
+                            placeholder="https://linkedin.com/company/yourcompany"
+                            disabled={!isEditing}
+                          />
                         </div>
                       </div>
                     </div>
@@ -874,6 +993,45 @@ export default function Dashboard() {
             </Link>
           </div>
         </div>
+
+        {/* Delete Profile Confirmation Modal */}
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+              <div className="flex items-center space-x-3 mb-4">
+                <Trash2 className="h-6 w-6 text-red-600" />
+                <h3 className="text-lg font-semibold text-gray-900">Delete Business Profile</h3>
+              </div>
+              
+              <p className="text-gray-600 mb-6">
+                Are you sure you want to delete your business profile? This action cannot be undone. 
+                A new default profile will be created for you.
+              </p>
+              
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="btn-secondary flex-1"
+                  disabled={deleting}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={deleteProfile}
+                  disabled={deleting}
+                  className="btn-danger flex-1 flex items-center justify-center space-x-2"
+                >
+                  {deleting ? (
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  ) : (
+                    <Trash2 className="h-5 w-5" />
+                  )}
+                  <span>{deleting ? 'Deleting...' : 'Delete Profile'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

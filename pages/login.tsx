@@ -7,7 +7,7 @@ export default function Login() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [companyName, setCompanyName] = useState('Companies');
+  const [companyName, setCompanyName] = useState('');
   const [companyUrl, setCompanyUrl] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -54,7 +54,7 @@ export default function Login() {
           // Reset form
           setEmail('');
           setPassword('');
-          setCompanyName('Companies');
+          setCompanyName('');
           setCompanyUrl('');
         }
       } else {
@@ -77,12 +77,12 @@ export default function Login() {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="text-center">
           <h2 className="text-3xl font-bold text-gray-900">
-            {isSignUp ? 'Join TCA' : 'Welcome Back'}
+            {isSignUp ? 'Join THSA' : 'Welcome Back'}
           </h2>
           <p className="mt-2 text-sm text-gray-600">
             {isSignUp 
-              ? 'Create your account to access exclusive TCA benefits'
-              : 'Sign in to your TCA account'
+              ? 'Create your account to access exclusive THSA benefits'
+              : 'Sign in to your THSA account'
             }
           </p>
           {isSignUp && (
@@ -138,7 +138,7 @@ export default function Login() {
                       value={companyName}
                       onChange={(e) => setCompanyName(e.target.value)}
                       className="input-field pl-10"
-                      placeholder="Enter company name"
+                      placeholder="Enter your company or business name"
                     />
                   </div>
                 </div>
@@ -157,7 +157,7 @@ export default function Login() {
                       value={companyUrl}
                       onChange={(e) => setCompanyUrl(e.target.value)}
                       className="input-field pl-10"
-                      placeholder="https://your-company.com"
+                      placeholder="https://your-website.com (optional)"
                     />
                   </div>
                 </div>
