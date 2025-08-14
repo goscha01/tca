@@ -36,7 +36,6 @@ export default function Training() {
   }, [user]);
 
   const fetchCourses = async () => {
-    if (!supabase) return
     
     try {
       let query = supabase
@@ -60,7 +59,7 @@ export default function Training() {
   };
 
   const fetchUserProgress = async () => {
-    if (!user || !supabase) return;
+    if (!user) return;
 
     try {
       const { data, error } = await supabase

@@ -95,7 +95,7 @@ export default function Dashboard() {
   }, [profile?.logo_url]);
 
   const fetchBusinessProfile = async () => {
-    if (!user || !supabase) return;
+    if (!user) return;
 
     try {
       const { data, error } = await supabase
@@ -276,7 +276,7 @@ export default function Dashboard() {
   };
 
   const saveProfile = async () => {
-    if (!profile || !user || !supabase) return;
+    if (!profile || !user) return;
 
     setSaving(true);
     try {
@@ -325,7 +325,7 @@ export default function Dashboard() {
   };
 
   const deleteProfile = async () => {
-    if (!profile || !user || !supabase) return;
+    if (!profile || !user) return;
 
     setDeleting(true);
     try {

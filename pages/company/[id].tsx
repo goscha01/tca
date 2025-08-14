@@ -66,7 +66,7 @@ export default function CompanyProfile() {
   }, [id]);
 
   const fetchCompanyProfile = async () => {
-    if (!id || !supabase) return;
+    if (!id) return;
 
     try {
       const { data, error } = await supabase

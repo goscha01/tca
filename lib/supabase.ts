@@ -1,12 +1,12 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co'
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key'
+// For static export (S3), we need to hardcode these values
+// since process.env is not available at runtime
+const supabaseUrl = 'https://rynxevsdruxautbigfbx.supabase.co'
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ5bnhldnNkcnV4YXV0YmlnZmJ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUxMDA0MzgsImV4cCI6MjA3MDY3NjQzOH0.1u2Z35VQ9Ms14GBIlabp5PyxTDJCUqwwtdj0rpJ_nW8'
 
-// Only create client if we have valid environment variables
-export const supabase = supabaseUrl !== 'https://placeholder.supabase.co' && supabaseAnonKey !== 'placeholder-key'
-  ? createClient(supabaseUrl, supabaseAnonKey)
-  : null
+// Create the Supabase client
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // Database types
 export interface User {

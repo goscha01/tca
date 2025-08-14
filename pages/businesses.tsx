@@ -32,8 +32,6 @@ export default function Businesses() {
   }, []);
 
   const fetchBusinesses = async () => {
-    if (!supabase) return;
-    
     try {
       const { data, error } = await supabase
         .from('businesses')
