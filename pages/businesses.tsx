@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { Shield, MapPin, Phone, Mail, Globe, Building, Star, Users } from 'lucide-react';
+import Link from 'next/link';
 
 interface Business {
   id: string;
@@ -127,7 +128,11 @@ export default function Businesses() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredBusinesses.map((business) => (
-              <div key={business.id} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
+              <Link 
+                key={business.id} 
+                href={`/company/${business.id}`}
+                className="block bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 hover:scale-[1.02] cursor-pointer"
+              >
                 {/* Business Header */}
                 <div className="p-6 border-b border-gray-200">
                   <div className="flex items-start space-x-4">
@@ -272,8 +277,17 @@ export default function Businesses() {
                       </div>
                     </div>
                   </div>
+                  
+                  {/* View Profile Button */}
+                  <div className="pt-3">
+                    <div className="text-center">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary text-white">
+                        Click to View Full Profile
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}
