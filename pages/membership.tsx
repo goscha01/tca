@@ -3,33 +3,6 @@ import Link from 'next/link';
 import { Shield, Award, BookOpen, Users, Check, Star } from 'lucide-react';
 
 export default function Membership() {
-  const scrollToCards = () => {
-    console.log('scrollToCards function called');
-    const cards = document.getElementById('membership-cards');
-    console.log('Found element:', cards);
-    if (cards) {
-      console.log('Scrolling to cards...');
-      const rect = cards.getBoundingClientRect();
-      const scrollTop = window.pageYOffset + rect.top - 100; // 100px offset
-      window.scrollTo({
-        top: scrollTop,
-        behavior: 'smooth'
-      });
-    } else {
-      console.log('Element not found, trying alternative approach...');
-      // Alternative approach - scroll to the section
-      const section = document.getElementById('membership-tiers');
-      if (section) {
-        const rect = section.getBoundingClientRect();
-        const scrollTop = window.pageYOffset + rect.top + 200; // Scroll down to show cards
-        window.scrollTo({
-          top: scrollTop,
-          behavior: 'smooth'
-        });
-      }
-    }
-  };
-
   const membershipTiers = [
     {
       name: "Listed",
@@ -221,16 +194,16 @@ export default function Membership() {
                     </ul>
                   </div>
 
-                  <button 
-                    onClick={scrollToCards}
-                    className={`w-full py-3 px-6 rounded-lg font-semibold transition-colors ${
+                  <Link 
+                    href="/login?mode=signup" 
+                    className={`w-full py-3 px-6 rounded-lg font-semibold transition-colors inline-block text-center ${
                       tier.popular 
                         ? 'bg-white text-primary hover:bg-gray-100' 
                         : 'bg-white/20 hover:bg-white/30'
                     }`}
                   >
                     {tier.cta}
-                  </button>
+                  </Link>
                 </div>
               </div>
             ))}
@@ -276,12 +249,12 @@ export default function Membership() {
             Join thousands of professionals who trust THSA for industry recognition and growth.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button 
-              onClick={scrollToCards}
+            <Link 
+              href="#membership-tiers" 
               className="bg-white text-primary px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
             >
               Get Started Free
-            </button>
+            </Link>
             <Link 
               href="/contact" 
               className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white hover:text-primary transition-colors"
