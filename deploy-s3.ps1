@@ -1,6 +1,22 @@
 # Complete Deployment Script - Build, Git Push, and S3 Upload
 Write-Host "Starting Complete TCA Website Deployment..." -ForegroundColor Green
 
+# Load environment variables from .env.local
+Write-Host "Loading environment variables..." -ForegroundColor Yellow
+if (Test-Path ".env.local") {
+    Get-Content ".env.local" | ForEach-Object {
+        if ($_ -match '^([^#][^=]+)=(.*)$') {
+            $name = $matches[1].Trim()
+            $value = $matches[2].Trim()
+            [Environment]::SetEnvironmentVariable($name, $value, "Process")
+            Write-Host "Loaded: $name" -ForegroundColor Gray
+        }
+    }
+    Write-Host "Environment variables loaded successfully!" -ForegroundColor Green
+} else {
+    Write-Host "No .env.local file found" -ForegroundColor Yellow
+}
+
 # Clean builds
 Write-Host "Cleaning previous builds..." -ForegroundColor Yellow
 if (Test-Path ".next") { Remove-Item -Recurse -Force ".next" -ErrorAction SilentlyContinue }
