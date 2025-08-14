@@ -7,27 +7,27 @@ export default function About() {
     {
       icon: Shield,
       title: "Professional credibility boost",
-      description: "Gain instant trust with the official TCA seal and membership status"
+      description: "Gain instant trust with the official THSA Certified seal and membership status"
     },
     {
       icon: Award,
-      title: "Official TCA seal to display online and in marketing materials",
-      description: "Show customers you're part of a trusted professional organization"
+      title: "Official THSA seal for marketing",
+      description: "Display your certification on your website, business cards, uniforms, and social media to show customers you're a verified, trusted provider"
     },
     {
       icon: Users,
       title: "Inclusion in our member directory",
-      description: "Get discovered by potential customers looking for trusted cleaners"
+      description: "Get discovered by potential customers searching for vetted and reliable home service providers"
     },
     {
       icon: Award,
       title: "Access to awards and recognition programs",
-      description: "Compete for industry recognition based on customer satisfaction"
+      description: "Compete for industry recognition based on service quality and customer satisfaction"
     },
     {
       icon: BookOpen,
-      title: "Member-only resources and training",
-      description: "Access exclusive training materials and professional development"
+      title: "Exclusive resources and training",
+      description: "Access member-only training materials, business tools, and professional development opportunities"
     }
   ];
 
@@ -37,10 +37,10 @@ export default function About() {
       <section className="bg-gradient-to-br from-primary to-primary-dark text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            About Trusted Cleaners Association
+            About Trusted House Services Association
           </h1>
           <p className="text-xl md:text-2xl max-w-3xl mx-auto opacity-90">
-            Promoting trust, transparency, and quality in the cleaning industry since 2024.
+            Promoting trust, transparency, and quality in home services since 2024.
           </p>
         </div>
       </section>
@@ -54,8 +54,8 @@ export default function About() {
               <Shield className="w-10 h-10 text-primary" />
             </div>
             <p className="text-lg text-gray-700 leading-relaxed max-w-3xl mx-auto">
-              The Trusted Cleaners Association (TCA) is a professional organization dedicated to promoting trust, 
-              transparency, and quality in the cleaning industry. We help cleaners earn recognition, grow their 
+              The Trusted House Services Association (THSA) is a professional organization dedicated to raising the standards of trust, 
+              transparency, and quality across the home services industry. We help service providers—from cleaners to handymen, landscapers, and beyond—earn recognition, grow their 
               skills, and stand out from the competition.
             </p>
           </div>
@@ -67,8 +67,8 @@ export default function About() {
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Our Mission</h2>
             <p className="text-lg text-gray-700 leading-relaxed max-w-2xl mx-auto">
-              Our mission is to set and uphold the highest standards in cleaning services, ensuring both 
-              clients and cleaners benefit from professionalism and integrity.
+              Our mission is to set and uphold the highest standards in home services, ensuring both 
+              clients and professionals benefit from exceptional service, integrity, and reliability.
             </p>
           </div>
 
@@ -108,7 +108,7 @@ export default function About() {
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2">Trust</h3>
                 <p className="text-gray-600 text-sm">
-                  Building confidence through verified credentials and proven track records
+                  Building customer confidence through verified credentials, proof of insurance, and a track record of quality service
                 </p>
               </div>
               <div className="text-center">
@@ -117,7 +117,7 @@ export default function About() {
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2">Excellence</h3>
                 <p className="text-gray-600 text-sm">
-                  Maintaining the highest standards in service quality and professionalism
+                  Maintaining the highest standards in service quality, professionalism, and customer care
                 </p>
               </div>
               <div className="text-center">
@@ -126,7 +126,7 @@ export default function About() {
                 </div>
                 <h3 className="font-semibold text-gray-900 mb-2">Community</h3>
                 <p className="text-gray-600 text-sm">
-                  Supporting and connecting cleaning professionals across the industry
+                  Supporting and connecting home service professionals across multiple industries to share knowledge and grow together
                 </p>
               </div>
             </div>
@@ -138,11 +138,11 @@ export default function About() {
               Ready to Join Our Community?
             </h2>
             <p className="text-lg text-gray-600 mb-8">
-              Become part of the Trusted Cleaners Association and start building your professional reputation today.
+              Become part of the Trusted House Services Association and start building your professional reputation today.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/membership" className="btn-primary">
-                Join TCA Now
+              <Link href="/login?mode=signup" className="btn-primary">
+                Join THSA Now
               </Link>
               <Link href="/contact" className="btn-outline">
                 Contact Us

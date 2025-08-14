@@ -5,7 +5,7 @@ interface AuthContextType {
   user: User | null
   loading: boolean
   signIn: (email: string, password: string) => Promise<{ error: any }>
-  signUp: (email: string, password: string, companyName: string) => Promise<{ error: any }>
+  signUp: (email: string, password: string, companyName: string, companyUrl?: string) => Promise<{ error: any }>
   signOut: () => Promise<void>
   resetPassword: (email: string) => Promise<{ error: any }>
 }
@@ -51,25 +51,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const fetchUserProfile = async (userId: string) => {
-    if (!supabase) return
+    if (!supabase) return;
     
     try {
-      console.log('Fetching user profile for ID:', userId);
-      
-      // First check if we have a valid session
-      const { data: { session } } = await supabase.auth.getSession();
-      console.log('Current session:', session);
-      
-      if (!session) {
-        console.log('No active session found');
-        return;
-      }
-      
       const { data, error } = await supabase
         .from('users')
         .select('*')
         .eq('id', userId)
-        .single()
+        .single();
 
       if (error) {
         console.error('Error fetching user profile:', error);
@@ -79,63 +68,151 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           hint: error.hint,
           code: error.code
         });
+        
+        // If user profile doesn't exist, create one
+        if (error.code === 'PGRST116') {
+          console.log('User profile not found, creating one...');
+          const { data: userData } = await supabase.auth.getUser();
+          
+          if (userData?.user) {
+            // Derive company name from email
+            let companyName = 'Professional Services';
+            if (userData.user.email && userData.user.email.includes('@')) {
+              const emailParts = userData.user.email.split('@');
+              if (emailParts.length === 2) {
+                companyName = emailParts[0].charAt(0).toUpperCase() + 
+                             emailParts[0].slice(1).toLowerCase() + ' ' +
+                             emailParts[1].charAt(0).toUpperCase() + 
+                             emailParts[1].slice(1).toLowerCase();
+              }
+            }
+            
+            const { data: newProfile, error: createError } = await supabase
+              .from('users')
+              .insert({
+                id: userData.user.id,
+                email: userData.user.email,
+                company_name: companyName,
+                membership_tier: 'free',
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+              })
+              .select()
+              .single();
+            
+            if (createError) {
+              console.error('Error creating user profile:', createError);
+            } else {
+              console.log('User profile created successfully:', newProfile);
+              setUser(newProfile);
+              return;
+            }
+          }
+        }
       } else if (data) {
         console.log('User profile fetched successfully:', data);
-        setUser(data)
+        
+        // Ensure company name is not "New Company" or "Your Company"
+        if (data.company_name && 
+            ['New Company', 'Your Company', 'new company', 'your company'].includes(data.company_name)) {
+          
+          let newCompanyName = 'Professional Services';
+          if (data.email && data.email.includes('@')) {
+            const emailParts = data.email.split('@');
+            if (emailParts.length === 2) {
+              newCompanyName = emailParts[0].charAt(0).toUpperCase() + 
+                              emailParts[0].slice(1).toLowerCase() + ' ' +
+                              emailParts[1].charAt(0).toUpperCase() + 
+                              emailParts[1].slice(1).toLowerCase();
+            }
+          }
+          
+          // Update the company name
+          const { error: updateError } = await supabase
+            .from('users')
+            .update({ 
+              company_name: newCompanyName,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', userId);
+          
+          if (updateError) {
+            console.error('Error updating company name:', updateError);
+          } else {
+            data.company_name = newCompanyName;
+            console.log('Company name updated to:', newCompanyName);
+          }
+        }
+        
+        setUser(data);
       }
-    } catch (err) {
-      console.error('Exception in fetchUserProfile:', err);
+    } catch (error) {
+      console.error('Unexpected error in fetchUserProfile:', error);
     }
-  }
+  };
 
   const signIn = async (email: string, password: string) => {
-    if (!supabase) return { error: { message: 'Supabase not configured' } }
+    if (!supabase) return { error: 'Supabase not initialized' };
     
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-    
-    if (!error && data.user) {
-      // Check if the user profile has "New Company" and update it
-      const { data: profileData, error: profileError } = await supabase
-        .from('users')
-        .select('company_name')
-        .eq('id', data.user.id)
-        .single()
-      
-      if (!profileError && profileData && profileData.company_name === 'New Company') {
-        // Update the company name to something more appropriate
-        // You can customize this or prompt the user to enter their company name
-        const { error: updateError } = await supabase
-          .from('users')
-          .update({ company_name: 'Your Company' })
-          .eq('id', data.user.id)
-        
-        if (updateError) {
-          console.error('Error updating company name:', updateError)
-        }
-      }
-    }
-    
-    return { error }
-  }
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
 
-  const signUp = async (email: string, password: string, companyName: string) => {
-    if (!supabase) return { error: { message: 'Supabase not configured' } }
-    
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          company_name: companyName
-        }
+      if (error) {
+        return { error: error.message };
       }
-    })
-    
-    return { error }
-  }
+
+      if (data.user) {
+        // Fetch the user profile immediately after sign-in
+        await fetchUserProfile(data.user.id);
+      }
+
+      return { data, error: null };
+    } catch (error) {
+      return { error: 'An unexpected error occurred' };
+    }
+  };
+
+  const signUp = async (email: string, password: string, companyName: string, companyUrl?: string) => {
+    if (!supabase) return { error: 'Supabase not initialized' };
+
+    try {
+      console.log('Signing up with company name:', companyName, 'companyUrl:', companyUrl);
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            company_name: companyName,
+            business_link: companyUrl || null
+          }
+        }
+      });
+
+      if (error) {
+        console.error('Supabase signup error:', error);
+        return { error: error.message };
+      }
+
+              if (data.user) {
+          console.log('User created successfully. Profile will be created automatically by database trigger.');
+          
+          // The database trigger will create the user profile automatically
+          // We just need to wait a moment for it to complete
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          console.log('User profile should now be available.');
+        }
+
+      return { data, error: null };
+    } catch (error) {
+      console.error('Unexpected error in signUp:', error);
+      return { error: 'An unexpected error occurred' };
+    }
+  };
 
   const signOut = async () => {
     if (!supabase) return

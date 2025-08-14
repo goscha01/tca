@@ -20,66 +20,66 @@ export default function Header() {
             <Link href="/" className="flex items-center space-x-2">
               <Shield className="h-8 w-8 text-primary" />
               <div className="flex items-center space-x-2">
-                <span className="text-xl font-bold text-gray-900">TCA</span>
-                <div className="flex flex-col text-xs text-gray-600 leading-tight">
-                  <span>Trusted Cleaners</span>
-                  <span>Association</span>
-                </div>
+                                 <span className="text-2xl font-bold text-gray-900 leading-none">THSA</span>
+                                    <div className="flex flex-col text-xs text-gray-600 leading-tight justify-center">
+                      <span>Trusted Home</span>
+                      <span>Services</span>
+                    </div>
               </div>
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-8">
-            <Link href="/" className="text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium">
-              Home
-            </Link>
-            <Link href="/about" className="text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium">
-              About
-            </Link>
-            <Link href="/membership" className="text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium">
-              Membership
-            </Link>
-            <Link href="/training" className="text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium">
-              Training
-            </Link>
-            <Link href="/awards" className="text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium">
-              Awards
-            </Link>
-            <Link href="/contact" className="text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium">
-              Contact
-            </Link>
-          </nav>
+                     {/* Desktop Navigation */}
+           <nav className="hidden md:flex space-x-8">
+             <Link href="/" className="text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium">
+               Home
+             </Link>
+             <Link href="/about" className="text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium">
+               About
+             </Link>
+             <Link href="/membership" className="text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium">
+               Membership
+             </Link>
+             <Link href="/businesses" className="text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium">
+               Businesses
+             </Link>
+             <Link href="/training" className="text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium">
+               Training
+             </Link>
+             <Link href="/awards" className="text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium">
+               Awards
+             </Link>
+           </nav>
 
-          {/* Desktop Auth Buttons */}
-          <div className="hidden md:flex items-center space-x-4">
-            {user ? (
-              <div className="flex items-center space-x-4">
-                <Link href="/dashboard" className="flex items-center space-x-2 text-gray-700 hover:text-primary">
-                  <User className="h-5 w-5" />
-                  <span className="text-sm font-medium">
-                    {user.company_name || user.email}
-                  </span>
-                </Link>
-                <button
-                  onClick={handleSignOut}
-                  className="flex items-center space-x-2 text-gray-700 hover:text-red-600 transition-colors"
-                >
-                  <LogOut className="h-5 w-5" />
-                  <span className="text-sm font-medium">Sign Out</span>
-                </button>
-              </div>
-            ) : (
-              <>
-                <Link href="/login" className="text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium">
-                  Sign In
-                </Link>
-                <Link href="/membership" className="btn-primary">
-                  Join TCA
-                </Link>
-              </>
-            )}
-          </div>
+                     {/* Desktop Auth Buttons */}
+           <div className="hidden md:flex items-center space-x-4">
+             {user ? (
+               <div className="flex items-center space-x-4">
+
+                 <Link 
+                   href="/dashboard" 
+                   className="text-gray-700 hover:text-primary transition-colors font-medium"
+                 >
+                   {user.company_name || 'Dashboard'}
+                 </Link>
+                 <button
+                   onClick={signOut}
+                   className="text-gray-700 hover:text-primary transition-colors"
+                 >
+                   Sign Out
+                 </button>
+               </div>
+             ) : (
+               <>
+                 <Link href="/login" className="text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium">
+                   Sign In
+                 </Link>
+                                                      <Link href="/login?mode=signup" className="btn-primary">
+                     Join THSA
+                   </Link>
+               </>
+             )}
+           </div>
 
           {/* Mobile menu button */}
           <div className="md:hidden">
@@ -115,56 +115,57 @@ export default function Header() {
             >
               About
             </Link>
-            <Link
-              href="/membership"
-              className="text-gray-700 hover:text-primary block px-3 py-2 text-base font-medium"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Membership
-            </Link>
-            <Link
-              href="/training"
-              className="text-gray-700 hover:text-primary block px-3 py-2 text-base font-medium"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Training
-            </Link>
-            <Link
-              href="/awards"
-              className="text-gray-700 hover:text-primary block px-3 py-2 text-base font-medium"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Awards
-            </Link>
-            <Link
-              href="/contact"
-              className="text-gray-700 hover:text-primary block px-3 py-2 text-base font-medium"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Contact
-            </Link>
+                         <Link
+               href="/membership"
+               className="text-gray-700 hover:text-primary block px-3 py-2 text-base font-medium"
+               onClick={() => setIsMobileMenuOpen(false)}
+             >
+               Membership
+             </Link>
+             <Link
+               href="/businesses"
+               className="text-gray-700 hover:text-primary block px-3 py-2 text-base font-medium"
+               onClick={() => setIsMobileMenuOpen(false)}
+             >
+               Businesses
+             </Link>
+             <Link
+               href="/training"
+               className="text-gray-700 hover:text-primary block px-3 py-2 text-base font-medium"
+               onClick={() => setIsMobileMenuOpen(false)}
+             >
+               Training
+             </Link>
+             <Link
+               href="/awards"
+               className="text-gray-700 hover:text-primary block px-3 py-2 text-base font-medium"
+               onClick={() => setIsMobileMenuOpen(false)}
+             >
+               Awards
+             </Link>
             
-            {/* Mobile Auth */}
-            {user ? (
-              <div className="pt-4 border-t border-gray-200">
-                <Link
-                  href="/dashboard"
-                  className="text-gray-700 hover:text-primary block px-3 py-2 text-base font-medium"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Dashboard
-                </Link>
-                <button
-                  onClick={() => {
-                    handleSignOut();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="text-gray-700 hover:text-red-600 block w-full text-left px-3 py-2 text-base font-medium"
-                >
-                  Sign Out
-                </button>
-              </div>
-            ) : (
+                         {/* Mobile Auth */}
+             {user ? (
+               <div className="pt-4 border-t border-gray-200">
+
+                 <Link
+                   href="/dashboard"
+                   className="text-gray-700 hover:text-primary block px-3 py-2 text-base font-medium"
+                   onClick={() => setIsMobileMenuOpen(false)}
+                 >
+                   {user.company_name || 'Dashboard'}
+                 </Link>
+                 <button
+                   onClick={() => {
+                     handleSignOut();
+                     setIsMobileMenuOpen(false);
+                   }}
+                   className="text-gray-700 hover:text-red-600 block w-full text-left px-3 py-2 text-base font-medium"
+                 >
+                   Sign Out
+                 </button>
+               </div>
+             ) : (
               <div className="pt-4 border-t border-gray-200 space-y-2">
                 <Link
                   href="/login"
@@ -173,13 +174,13 @@ export default function Header() {
                 >
                   Sign In
                 </Link>
-                <Link
-                  href="/membership"
-                  className="btn-primary block text-center"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Join TCA
-                </Link>
+                                                   <Link
+                    href="/login?mode=signup"
+                    className="btn-primary block text-center"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    Join THSA
+                  </Link>
               </div>
             )}
           </div>

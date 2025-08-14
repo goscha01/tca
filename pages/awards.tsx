@@ -30,71 +30,71 @@ export default function Awards() {
   const currentWinners = [
     {
       year: "2024",
-      category: "Excellence in Residential Cleaning",
-      winner: "Sparkle Clean Pro",
+      category: "Excellence in Residential Services",
+      winner: "Sparkle Home Services",
       location: "New York, NY",
       rating: 4.9,
       reviews: 247,
-      specialty: "Premium residential cleaning services"
+      specialty: "Premium residential service solutions"
     },
     {
       year: "2024",
-      category: "Outstanding Commercial Cleaning",
-      winner: "Elite Commercial Cleaners",
+      category: "Outstanding Commercial Services",
+      winner: "Elite Commercial Services",
       location: "Los Angeles, CA",
       rating: 4.8,
       reviews: 189,
-      specialty: "Large-scale commercial facilities"
+      specialty: "Large-scale commercial projects"
     },
     {
       year: "2024",
       category: "Customer Service Champion",
-      winner: "Fresh Start Cleaners",
+      winner: "Fresh Start Home Services",
       location: "Chicago, IL",
       rating: 4.9,
       reviews: 156,
-      specialty: "Eco-friendly cleaning solutions"
+      specialty: "Eco-friendly and client-focused services"
     },
     {
       year: "2023",
-      category: "Innovation in Cleaning",
-      winner: "Green Clean Solutions",
+      category: "Innovation in Home Services",
+      winner: "Green Home Solutions",
       location: "Austin, TX",
       rating: 4.7,
       reviews: 134,
-      specialty: "Sustainable cleaning technology"
+      specialty: "Sustainable service technology and methods"
     }
   ];
 
   const awardCategories = [
     {
-      name: "Excellence in Residential Cleaning",
-      description: "Recognizing outstanding residential cleaning services",
+      name: "Excellence in Residential Services",
+      description: "Recognizing outstanding residential home service providers",
       icon: "🏠"
     },
     {
-      name: "Outstanding Commercial Cleaning",
-      description: "Awarding excellence in commercial and industrial cleaning",
+      name: "Outstanding Commercial Services",
+      description: "Awarding excellence in commercial and industrial service projects",
       icon: "🏢"
     },
     {
       name: "Customer Service Champion",
-      description: "Celebrating exceptional customer service and satisfaction",
+      description: "Celebrating exceptional customer service and client satisfaction",
       icon: "🤝"
     },
     {
-      name: "Innovation in Cleaning",
-      description: "Honoring innovative approaches and new technologies",
+      name: "Innovation in Home Services",
+      description: "Honoring innovative approaches, techniques, or technologies",
       icon: "💡"
     },
     {
-      name: "Green Cleaning Excellence",
-      description: "Recognizing eco-friendly and sustainable practices",
+      name: "Sustainability & Green Practices",
+      description: "Recognizing eco-friendly and environmentally conscious practices",
       icon: "🌱"
     },
     {
-      name: "Rising Star",
-      description: "Awarding new businesses with exceptional potential",
+      name: "Rising Star Award",
+      description: "Celebrating new businesses with exceptional potential and early achievements",
       icon: "⭐"
     }
   ];
@@ -105,14 +105,14 @@ export default function Awards() {
       <section className="bg-gradient-to-br from-primary to-primary-dark text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            TCA Excellence Awards
+            THSA Excellence Awards
           </h1>
           <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto opacity-90">
-            Each year, TCA recognizes outstanding cleaning professionals based on customer reviews and community feedback.
+            Each year, the Trusted Home Services Association recognizes outstanding home service professionals based on customer reviews, community feedback, and service quality.
           </p>
           <div className="flex items-center justify-center space-x-2 text-lg">
             <Trophy className="w-6 h-6 text-yellow-300" />
-            <span>Celebrating excellence in the cleaning industry</span>
+            <span>Celebrating Excellence Across the Home Services Industry</span>
           </div>
         </div>
       </section>
@@ -125,7 +125,7 @@ export default function Awards() {
               Award Categories
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              We recognize excellence across multiple categories to celebrate the diverse talents in our industry.
+              We honor excellence across multiple categories to highlight the diverse talents of our members.
             </p>
           </div>
 
@@ -153,7 +153,7 @@ export default function Awards() {
               Nominate Your Business
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Ready to be recognized? Submit your nomination for the TCA Excellence Awards.
+              Ready to be recognized? Submit your nomination for the THSA Excellence Awards.
             </p>
           </div>
 
@@ -232,11 +232,12 @@ export default function Awards() {
                     required
                   >
                     <option value="">Select business type</option>
-                    <option value="residential">Residential Cleaning</option>
-                    <option value="commercial">Commercial Cleaning</option>
-                    <option value="industrial">Industrial Cleaning</option>
-                    <option value="specialized">Specialized Cleaning</option>
-                    <option value="mixed">Mixed Services</option>
+                    <option value="cleaning">Cleaning</option>
+                    <option value="plumbing">Plumbing</option>
+                    <option value="electrical">Electrical</option>
+                    <option value="landscaping">Landscaping</option>
+                    <option value="handyman">Handyman</option>
+                    <option value="other">Other</option>
                   </select>
                 </div>
 
@@ -300,17 +301,17 @@ export default function Awards() {
                 <div className="flex items-start space-x-3">
                   <Award className="w-5 h-5 text-blue-600 mt-0.5" />
                   <div>
-                    <h4 className="font-medium text-blue-900 mb-1">Nomination Fee: $20</h4>
+                    <h4 className="font-medium text-blue-900 mb-1">Nomination Fee: $19</h4>
                     <p className="text-sm text-blue-800">
                       The nomination fee covers the review process and evaluation of your business. 
-                      Winners receive a prestigious TCA Excellence Award certificate and recognition.
+                      Winners receive a prestigious THSA Excellence Award certificate and recognition.
                     </p>
                   </div>
                 </div>
               </div>
 
               <button type="submit" className="btn-primary w-full">
-                Submit Nomination & Pay $20
+                Submit Nomination & Pay $19
               </button>
             </form>
           </div>
@@ -325,7 +326,7 @@ export default function Awards() {
               Current Winners
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Meet our outstanding award recipients who exemplify excellence in the cleaning industry.
+              Meet our outstanding recipients who exemplify excellence in home services.
             </p>
           </div>
 
@@ -371,14 +372,14 @@ export default function Awards() {
             Ready to Be Recognized?
           </h2>
           <p className="text-xl mb-8 opacity-90">
-            Submit your nomination today and join the ranks of TCA Excellence Award winners.
+            Submit your nomination today and join the ranks of THSA Excellence Award winners.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="#nomination" className="btn-primary bg-white text-secondary hover:bg-gray-100">
               Nominate Your Business
             </Link>
-            <Link href="/membership" className="btn-outline border-white text-white hover:bg-white hover:text-secondary">
-              Join TCA First
+            <Link href="/login?mode=signup" className="btn-outline border-white text-white hover:bg-white hover:text-secondary">
+              Join THSA First
             </Link>
           </div>
         </div>

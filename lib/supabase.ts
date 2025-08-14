@@ -17,6 +17,7 @@ export interface User {
   membership_expires?: string
   logo_url?: string
   business_link?: string
+  phone?: string
   created_at: string
   updated_at: string
 }

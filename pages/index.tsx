@@ -6,44 +6,44 @@ export default function Home() {
   const benefits = [
     {
       icon: Shield,
-      title: "Get our official TCA seal for your website",
-      description: "Display the trusted TCA seal to build customer confidence"
+      title: "Official THSA Seal for Your Website",
+      description: "Display the trusted seal to build instant customer confidence"
     },
     {
       icon: Award,
-      title: "Win awards based on customer satisfaction",
-      description: "Get recognized for your exceptional service quality"
+      title: "Awards Based on Customer Satisfaction",
+      description: "Get recognized for delivering exceptional service quality"
     },
     {
       icon: BookOpen,
-      title: "Access exclusive professional training",
+      title: "Access Exclusive Professional Training",
       description: "Learn from industry experts and improve your skills"
     },
     {
       icon: TrendingUp,
-      title: "Boost your local SEO rankings",
-      description: "Improve your online visibility and attract more customers"
+      title: "Boost Local SEO Rankings",
+      description: "Increase your online visibility and attract more customers in your area"
     }
   ];
 
   const featuredMembers = [
     {
-      name: "Sparkle Clean Pro",
-      location: "New York, NY",
+      name: "ProCare Plumbing",
+      location: "Austin, TX",
       rating: 4.9,
-      specialty: "Residential & Commercial"
+      specialty: "Residential & Emergency Plumbing"
     },
     {
-      name: "Elite Cleaning Services",
-      location: "Los Angeles, CA",
+      name: "GreenLeaf Landscaping",
+      location: "Denver, CO",
       rating: 4.8,
-      specialty: "Deep Cleaning & Restoration"
+      specialty: "Eco-Friendly Lawn & Garden Care"
     },
     {
-      name: "Fresh Start Cleaners",
-      location: "Chicago, IL",
+      name: "Sparkle Home Cleaning",
+      location: "Miami, FL",
       rating: 4.9,
-      specialty: "Eco-Friendly Cleaning"
+      specialty: "Residential Deep Cleaning"
     }
   ];
 
@@ -53,15 +53,15 @@ export default function Home() {
       <section className="bg-gradient-to-br from-primary to-primary-dark text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            Join the Trusted Cleaners Association
+            Join the Trusted Home Services Association (THSA)
           </h1>
           <h2 className="text-xl md:text-2xl font-light mb-8">
-            Stand Out. Get Recognized. Grow Your Cleaning Business.
+            Stand Out. Get Recognized. Grow Your Home Service Business.
           </h2>
           <p className="text-lg md:text-xl mb-10 max-w-3xl mx-auto opacity-90">
-            Whether you're an independent cleaner or run a full team, TCA membership gives you the credibility and resources to succeed.
+            Whether you're an independent professional or manage a full team, THSA membership gives you the credibility, recognition, and resources to succeed in the competitive home services market.
           </p>
-          <Link href="/membership" className="btn-secondary text-lg px-8 py-4">
+          <Link href="/membership#membership-plans" className="btn-secondary text-lg px-8 py-4">
             Join Now
           </Link>
         </div>
@@ -72,10 +72,10 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Why Choose TCA Membership?
+              Why Choose THSA Membership?
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Get the tools and recognition you need to stand out in the competitive cleaning industry.
+              Gain the tools and recognition you need to differentiate your business and attract more clients.
             </p>
           </div>
 
@@ -102,10 +102,10 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Featured TCA Members
+              Featured THSA Members
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Meet some of our outstanding members who are setting the standard for excellence.
+              Meet some of our outstanding members who are setting the standard for excellence in home services.
             </p>
           </div>
 
@@ -146,7 +146,7 @@ export default function Home() {
             Ready to Join the Elite?
           </h2>
           <p className="text-xl mb-8 opacity-90">
-            Start your journey with TCA today and join hundreds of trusted cleaning professionals.
+            Start your journey with THSA today and join hundreds of trusted home service professionals.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/membership" className="btn-primary bg-white text-secondary hover:bg-gray-100">

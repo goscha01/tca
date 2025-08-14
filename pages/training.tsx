@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../lib/auth';
 import { supabase } from '../lib/supabase';
 import { BookOpen, Play, Download, Lock, Clock, CheckCircle } from 'lucide-react';
+import Link from 'next/link';
 
 interface TrainingCourse {
   id: string;
@@ -150,9 +151,9 @@ export default function Training() {
               to unlock all courses and track your progress.
             </p>
             <div className="space-x-4">
-              <a href="/membership" className="btn-primary">
+              <Link href="/login?mode=signup" className="btn-primary">
                 Join TCA Now
-              </a>
+              </Link>
               <a href="/login" className="btn-outline">
                 Sign In
               </a>

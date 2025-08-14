@@ -12,22 +12,22 @@ export default function Footer() {
             <div className="flex items-center space-x-2 mb-4">
               <Shield className="h-8 w-8 text-primary" />
               <div className="flex items-center space-x-2">
-                <span className="text-xl font-bold">TCA</span>
-                <div className="flex flex-col text-sm text-gray-400 leading-tight">
-                  <span>Trusted Cleaners</span>
-                  <span>Association</span>
+                                 <span className="text-2xl font-bold leading-none">THSA</span>
+                <div className="flex flex-col text-xs text-gray-400 leading-tight justify-center">
+                  <span>Trusted Home</span>
+                  <span>Services</span>
                 </div>
               </div>
             </div>
             <p className="text-gray-300 mb-4 max-w-md">
-              The Trusted Cleaners Association promotes trust, transparency, and quality in the cleaning industry. 
+              The Trusted Home Services Association promotes trust, transparency, and quality in the home services industry. 
               Join our community of trusted professionals.
             </p>
-            <div className="flex space-x-4">
-              <Link href="/membership" className="btn-primary">
-                Join Now
-              </Link>
-            </div>
+                         <div className="flex space-x-4">
+               <Link href="/login?mode=signup" className="btn-primary">
+                 Join Now
+               </Link>
+             </div>
           </div>
 
           {/* Quick Links */}
@@ -42,6 +42,14 @@ export default function Footer() {
               <li>
                 <Link href="/membership" className="text-gray-300 hover:text-white transition-colors">
                   Membership
+                </Link>
+              </li>
+              <li>
+
+              </li>
+              <li>
+                <Link href="/businesses" className="text-gray-300 hover:text-white transition-colors">
+                  Business Directory
                 </Link>
               </li>
               <li>
@@ -63,9 +71,9 @@ export default function Footer() {
             <div className="space-y-3">
               <div className="flex items-center space-x-2">
                 <Mail className="h-4 w-4 text-primary" />
-                <a href="mailto:info@trustedcleaners.org" className="text-gray-300 hover:text-white transition-colors">
-                  info@trustedcleaners.org
-                </a>
+                                 <a href="mailto:info@trustedhomeservices.org" className="text-gray-300 hover:text-white transition-colors">
+                   info@trustedhomeservices.org
+                 </a>
               </div>
               <div className="flex items-center space-x-2">
                 <Phone className="h-4 w-4 text-primary" />
@@ -73,16 +81,16 @@ export default function Footer() {
               </div>
               <div className="flex items-center space-x-2">
                 <MapPin className="h-4 w-4 text-primary" />
-                <span className="text-gray-300">123 Cleaning Ave, Suite 100<br />Professional City, PC 12345</span>
+                                 <span className="text-gray-300">123 Professional Ave, Suite 100<br />Service City, SC 12345</span>
               </div>
             </div>
           </div>
         </div>
 
         <div className="border-t border-gray-800 mt-8 pt-8 text-center">
-          <p className="text-gray-400">
-            © {new Date().getFullYear()} Trusted Cleaners Association. All rights reserved.
-          </p>
+                     <p className="text-gray-400">
+             © {new Date().getFullYear()} Trusted Home Services Association. All rights reserved.
+           </p>
         </div>
       </div>
     </footer>

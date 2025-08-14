@@ -83,15 +83,6 @@ export default function Dashboard() {
     }
   }, [user]);
 
-  // Cleanup local URLs when component unmounts
-  useEffect(() => {
-    return () => {
-      if (profile?.logo_url && profile.logo_url.startsWith('blob:')) {
-        URL.revokeObjectURL(profile.logo_url);
-      }
-    };
-  }, [profile?.logo_url]);
-
   const fetchBusinessProfile = async () => {
     if (!user || !supabase) return;
 
@@ -108,7 +99,7 @@ export default function Dashboard() {
         // If table doesn't exist, show setup message
         if (error.code === '42P01') {
           console.log('Businesses table does not exist yet');
-          setMessage('Business profile system is being set up. Please run the SQL script in Supabase to create the businesses table.');
+          setMessage('Business profile system is being set up. Please check back later.');
           return;
         }
         
@@ -145,7 +136,7 @@ export default function Dashboard() {
       description: '',
       logo_url: '',
       website: user?.business_link || '',
-      phone: user?.phone || '',
+      phone: '',
       email: user?.email || '',
       address: '',
       city: '',
@@ -189,49 +180,33 @@ export default function Dashboard() {
   };
 
   const uploadLogo = async () => {
-    if (!logoFile || !user) return;
+    if (!logoFile || !user || !supabase) return;
 
     setUploading(true);
     try {
-      // Try to upload to Supabase storage if available
-      if (supabase) {
-        const fileExt = logoFile.name.split('.').pop();
-        const fileName = `${user.id}-logo.${fileExt}`;
-        const filePath = `logos/${fileName}`;
+      const fileExt = logoFile.name.split('.').pop();
+      const fileName = `${user.id}-logo.${fileExt}`;
+      const filePath = `logos/${fileName}`;
 
-        const { error: uploadError } = await supabase.storage
-          .from('tca-assets')
-          .upload(filePath, logoFile);
+      const { error: uploadError } = await supabase.storage
+        .from('tca-assets')
+        .upload(filePath, logoFile);
 
-        if (uploadError) throw uploadError;
+      if (uploadError) throw uploadError;
 
-        const { data: { publicUrl } } = supabase.storage
-          .from('tca-assets')
-          .getPublicUrl(filePath);
+      const { data: { publicUrl } } = supabase.storage
+        .from('tca-assets')
+        .getPublicUrl(filePath);
 
-        if (profile) {
-          setProfile({ ...profile, logo_url: publicUrl });
-        }
-
-        setMessage('Logo uploaded successfully!');
-        setLogoFile(null);
-        return;
-      }
-    } catch (error) {
-      console.error('Upload error:', error);
-    }
-
-    // Fallback to local storage if Supabase is not available or fails
-    try {
-      const localUrl = URL.createObjectURL(logoFile);
       if (profile) {
-        setProfile({ ...profile, logo_url: localUrl });
+        setProfile({ ...profile, logo_url: publicUrl });
       }
-      setMessage('Logo uploaded successfully! (Local storage)');
+
+      setMessage('Logo uploaded successfully!');
       setLogoFile(null);
-    } catch (localError) {
+    } catch (error) {
       setMessage('Error uploading logo. Please try again.');
-      console.error('Local upload error:', localError);
+      console.error('Upload error:', error);
     } finally {
       setUploading(false);
     }
@@ -311,7 +286,7 @@ export default function Dashboard() {
         console.error('Database error during save:', error);
         
         if (error.code === '42P01') {
-          setMessage('Business profile system is not set up yet. Please run the SQL script in Supabase to create the businesses table.');
+          setMessage('Business profile system is not set up yet. Please contact support.');
         } else {
           throw error;
         }
@@ -399,8 +374,6 @@ export default function Dashboard() {
             {message}
           </div>
         )}
-        
-
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Company Logo Upload */}
@@ -410,10 +383,10 @@ export default function Dashboard() {
               <h2 className="text-xl font-semibold text-gray-900">Company Logo</h2>
             </div>
             
-            {profile?.logo_url ? (
+            {user.logo_url ? (
               <div className="mb-4">
                 <img 
-                  src={profile.logo_url} 
+                  src={user.logo_url} 
                   alt="Company Logo" 
                   className="h-20 w-auto rounded-lg border border-gray-200"
                 />
@@ -495,7 +468,6 @@ export default function Dashboard() {
                         </label>
                         <input
                           type="text"
-                          autoComplete="organization"
                           value={profile?.name || ''}
                           onChange={(e) => handleInputChange('name', e.target.value)}
                           className="input-field"
@@ -526,7 +498,6 @@ export default function Dashboard() {
                           <Globe className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                           <input
                             type="url"
-                            autoComplete="url"
                             value={profile?.website || ''}
                             onChange={(e) => handleInputChange('website', e.target.value)}
                             className="input-field pl-10"
@@ -553,7 +524,6 @@ export default function Dashboard() {
                           <Phone className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                           <input
                             type="tel"
-                            autoComplete="tel"
                             value={profile.phone}
                             onChange={(e) => handleInputChange('phone', e.target.value)}
                             className="input-field pl-10"
@@ -571,7 +541,6 @@ export default function Dashboard() {
                           <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                           <input
                             type="email"
-                            autoComplete="email"
                             value={profile.email}
                             onChange={(e) => handleInputChange('email', e.target.value)}
                             className="input-field pl-10"
@@ -878,3 +847,4 @@ export default function Dashboard() {
     </div>
   );
 }
+

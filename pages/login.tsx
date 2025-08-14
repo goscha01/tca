@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../lib/auth';
 import { useRouter } from 'next/router';
-import { Eye, EyeOff, Mail, Lock, Building } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, Building, Globe } from 'lucide-react';
 
 export default function Login() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [companyName, setCompanyName] = useState('');
+  const [companyName, setCompanyName] = useState('Companies');
+  const [companyUrl, setCompanyUrl] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -16,29 +17,55 @@ export default function Login() {
   const { signIn, signUp } = useAuth();
   const router = useRouter();
 
+  // Check URL parameters to automatically set signup mode
+  useEffect(() => {
+    if (router.query.mode === 'signup') {
+      setIsSignUp(true);
+    }
+  }, [router.query.mode]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
     setMessage('');
+    setLoading(true);
 
     try {
       if (isSignUp) {
-        const { error } = await signUp(email, password, companyName);
-        if (error) {
-          setError(error.message);
+        // Validate company name for signup
+        if (!companyName.trim()) {
+          setError('Please enter a company name.');
+          setLoading(false);
+          return;
+        }
+
+        // Validate password length
+        if (password.length < 6) {
+          setError('Password must be at least 6 characters long.');
+          setLoading(false);
+          return;
+        }
+
+        const result = await signUp(email, password, companyName, companyUrl);
+        if (result.error) {
+          setError(result.error);
         } else {
           setMessage('Account created successfully! Please check your email to verify your account.');
+          // Reset form
+          setEmail('');
+          setPassword('');
+          setCompanyName('Companies');
+          setCompanyUrl('');
         }
       } else {
-        const { error } = await signIn(email, password);
-        if (error) {
-          setError(error.message);
+        const result = await signIn(email, password);
+        if (result.error) {
+          setError(result.error);
         } else {
           router.push('/dashboard');
         }
       }
-    } catch (err) {
+    } catch (error) {
       setError('An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
@@ -95,22 +122,44 @@ export default function Login() {
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
             {isSignUp && (
-              <div>
-                <label htmlFor="companyName" className="block text-sm font-medium text-gray-700">
-                  Company Name
-                </label>
-                <div className="mt-1 relative">
-                  <Building className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                  <input
-                    id="companyName"
-                    name="companyName"
-                    type="text"
-                    required={isSignUp}
-                    value={companyName}
-                    onChange={(e) => setCompanyName(e.target.value)}
-                    className="input-field pl-10"
-                    placeholder="Enter your company name"
-                  />
+              <div className="space-y-4">
+                {/* Company Name Input */}
+                <div>
+                  <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 mb-2">
+                    Company Name <span className="text-red-500">*</span>
+                  </label>
+                  <div className="mt-1 relative">
+                    <Building className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                    <input
+                      id="companyName"
+                      name="companyName"
+                      type="text"
+                      required
+                      value={companyName}
+                      onChange={(e) => setCompanyName(e.target.value)}
+                      className="input-field pl-10"
+                      placeholder="Enter company name"
+                    />
+                  </div>
+                </div>
+
+                {/* Company URL Input (Optional) */}
+                <div>
+                  <label htmlFor="companyUrl" className="block text-sm font-medium text-gray-700 mb-2">
+                    Company Website (Optional)
+                  </label>
+                  <div className="mt-1 relative">
+                    <Globe className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                    <input
+                      id="companyUrl"
+                      name="companyUrl"
+                      type="url"
+                      value={companyUrl}
+                      onChange={(e) => setCompanyUrl(e.target.value)}
+                      className="input-field pl-10"
+                      placeholder="https://your-company.com"
+                    />
+                  </div>
                 </div>
               </div>
             )}
@@ -149,7 +198,7 @@ export default function Login() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="input-field pr-10"
+                  className="input-field pl-10 pr-10"
                   placeholder="Enter your password"
                 />
                 <button
@@ -210,6 +259,7 @@ export default function Login() {
                           setIsSignUp(true);
                           setError('');
                           setMessage('');
+                          // Keep the email for convenience
                         }}
                         className="text-sm text-primary hover:text-primary-dark font-medium underline"
                       >
@@ -223,29 +273,7 @@ export default function Login() {
 
             {message && (
               <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md">
-                <div className="flex flex-col space-y-2">
-                  <p>{message}</p>
-                  {message.includes('Account created successfully') && (
-                    <div className="text-sm">
-                      <p className="text-green-600">
-                        After verifying your email, you can sign in with your credentials.
-                      </p>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsSignUp(false);
-                          setMessage('');
-                          setEmail('');
-                          setPassword('');
-                          setCompanyName('');
-                        }}
-                        className="text-primary hover:text-primary-dark font-medium underline mt-1"
-                      >
-                        Switch to sign in
-                      </button>
-                    </div>
-                  )}
-                </div>
+                {message}
               </div>
             )}
 
@@ -253,7 +281,7 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={loading}
-                className="btn-primary w-full flex justify-center"
+                className="btn-primary w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
@@ -262,34 +290,28 @@ export default function Login() {
                 )}
               </button>
             </div>
-          </form>
 
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">
-                  {isSignUp ? 'Already have an account?' : "Don't have an account?"}
-                </span>
-              </div>
-            </div>
-
-            <div className="mt-6 text-center">
+            <div className="text-center">
               <button
                 type="button"
                 onClick={() => {
                   setIsSignUp(!isSignUp);
                   setError('');
                   setMessage('');
+                  // Reset form when switching modes
+                  if (!isSignUp) {
+                    setEmail('');
+                    setPassword('');
+                    setCompanyName('Companies');
+                    setCompanyUrl('');
+                  }
                 }}
-                className="text-primary hover:text-primary-dark font-medium"
+                className="text-sm text-primary hover:text-primary-dark font-medium"
               >
-                {isSignUp ? 'Sign in instead' : 'Join TCA Now'}
+                {isSignUp ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
               </button>
             </div>
-          </div>
+          </form>
         </div>
       </div>
     </div>
