@@ -3,6 +3,33 @@ import Link from 'next/link';
 import { Shield, Award, BookOpen, Users, Check, Star } from 'lucide-react';
 
 export default function Membership() {
+  const scrollToCards = () => {
+    console.log('scrollToCards function called');
+    const cards = document.getElementById('membership-cards');
+    console.log('Found element:', cards);
+    if (cards) {
+      console.log('Scrolling to cards...');
+      const rect = cards.getBoundingClientRect();
+      const scrollTop = window.pageYOffset + rect.top - 100; // 100px offset
+      window.scrollTo({
+        top: scrollTop,
+        behavior: 'smooth'
+      });
+    } else {
+      console.log('Element not found, trying alternative approach...');
+      // Alternative approach - scroll to the section
+      const section = document.getElementById('membership-tiers');
+      if (section) {
+        const rect = section.getBoundingClientRect();
+        const scrollTop = window.pageYOffset + rect.top + 200; // Scroll down to show cards
+        window.scrollTo({
+          top: scrollTop,
+          behavior: 'smooth'
+        });
+      }
+    }
+  };
+
   const membershipTiers = [
     {
       name: "Listed",
@@ -102,6 +129,7 @@ export default function Membership() {
 
   return (
     <div className="min-h-screen">
+      
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-primary to-primary-dark text-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -130,7 +158,7 @@ export default function Membership() {
       </section>
 
       {/* Membership Tiers */}
-      <section className="py-20 bg-gray-50">
+      <section id="membership-tiers" className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
@@ -142,7 +170,7 @@ export default function Membership() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-8">
+          <div id="membership-cards" className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-8 scroll-mt-20">
             {membershipTiers.map((tier, index) => (
               <div key={index} className={`relative rounded-2xl shadow-xl overflow-hidden ${tier.color} ${tier.textColor}`}>
                 {tier.popular && (
@@ -193,11 +221,14 @@ export default function Membership() {
                     </ul>
                   </div>
 
-                  <button className={`w-full py-3 px-6 rounded-lg font-semibold transition-colors ${
-                    tier.popular 
-                      ? 'bg-white text-primary hover:bg-gray-100' 
-                      : 'bg-white/20 hover:bg-white/30'
-                  }`}>
+                  <button 
+                    onClick={scrollToCards}
+                    className={`w-full py-3 px-6 rounded-lg font-semibold transition-colors ${
+                      tier.popular 
+                        ? 'bg-white text-primary hover:bg-gray-100' 
+                        : 'bg-white/20 hover:bg-white/30'
+                    }`}
+                  >
                     {tier.cta}
                   </button>
                 </div>
@@ -245,12 +276,12 @@ export default function Membership() {
             Join thousands of professionals who trust THSA for industry recognition and growth.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link 
-              href="/login" 
+            <button 
+              onClick={scrollToCards}
               className="bg-white text-primary px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
             >
               Get Started Free
-            </Link>
+            </button>
             <Link 
               href="/contact" 
               className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold hover:bg-white hover:text-primary transition-colors"

@@ -24,7 +24,7 @@ export default function Footer() {
               Join our community of trusted professionals.
             </p>
                          <div className="flex space-x-4">
-               <Link href="/login?mode=signup" className="btn-primary">
+               <Link href="/membership" className="btn-primary">
                  Join Now
                </Link>
              </div>

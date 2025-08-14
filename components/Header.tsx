@@ -74,7 +74,7 @@ export default function Header() {
                  <Link href="/login" className="text-gray-700 hover:text-primary px-3 py-2 text-sm font-medium">
                    Sign In
                  </Link>
-                                                      <Link href="/login?mode=signup" className="btn-primary">
+                                                      <Link href="/membership" className="btn-primary">
                      Join THSA
                    </Link>
                </>
@@ -175,7 +175,7 @@ export default function Header() {
                   Sign In
                 </Link>
                                                    <Link
-                    href="/login?mode=signup"
+                    href="/membership"
                     className="btn-primary block text-center"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
