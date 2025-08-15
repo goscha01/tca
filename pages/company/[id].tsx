@@ -13,7 +13,9 @@ import {
   Linkedin,
   Clock,
   Star,
-  Shield
+  Shield,
+  Image as ImageIcon,
+  FileText
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -44,12 +46,21 @@ interface CompanyProfile {
     instagram: string;
     twitter: string;
     linkedin: string;
+    thumbtack: string;
+    yelp: string;
   };
   services: string[];
-  specialties: string[];
-  certifications: string[];
+  projects: string[];
+  insurance_bond: string;
+  reviews: Array<{
+    customer_name: string;
+    rating: number;
+    comment: string;
+    date: string;
+  }>;
   created_at: string;
   updated_at: string;
+  google_place_id?: string;
 }
 
 export default function CompanyProfile() {
@@ -141,7 +152,7 @@ export default function CompanyProfile() {
             </Link>
             <div className="flex items-center space-x-2">
               <Shield className="h-6 w-6 text-primary" />
-                              <span className="text-sm text-gray-600">TSA Verified Member</span>
+              <span className="text-sm text-gray-600">TSA Verified Member</span>
             </div>
           </div>
         </div>
@@ -213,9 +224,64 @@ export default function CompanyProfile() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Column - Logo + Contact Info, Services */}
+          <div className="space-y-6">
+            {/* Logo and Contact Info Row */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <div className="flex items-start space-x-6">
+                {/* Logo Display */}
+                <div className="flex-shrink-0">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Company Logo</h3>
+                  {getLogoUrl(company.logo_url) ? (
+                    <img 
+                      src={getLogoUrl(company.logo_url) || ''} 
+                      alt={`${company.name} Logo`}
+                      className="h-20 w-auto rounded-lg border border-gray-200"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <div className="h-20 w-20 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
+                      <Building className="h-10 w-10 text-gray-400" />
+                    </div>
+                  )}
+                </div>
+                
+                {/* Contact Information */}
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Contact Information</h3>
+                  <div className="space-y-3">
+                    {company.phone && (
+                      <div className="flex items-center space-x-3">
+                        <Phone className="h-5 w-5 text-gray-400" />
+                        <span className="text-gray-700">{company.phone}</span>
+                      </div>
+                    )}
+                    {company.email && (
+                      <div className="flex items-center space-x-3">
+                        <Mail className="h-5 w-5 text-gray-400" />
+                        <span className="text-gray-700">{company.email}</span>
+                      </div>
+                    )}
+                    {company.address && (
+                      <div className="flex items-start space-x-3">
+                        <MapPin className="h-5 w-5 text-gray-400 mt-0.5" />
+                        <div className="text-gray-700">
+                          <div>{company.address}</div>
+                          {company.city && company.state && (
+                            <div>{company.city}, {company.state} {company.zip_code}</div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Services */}
             {company.services && company.services.length > 0 && (
               <div className="bg-white rounded-xl shadow-lg p-6">
@@ -233,77 +299,148 @@ export default function CompanyProfile() {
               </div>
             )}
 
-            {/* Specialties */}
-            {company.specialties && company.specialties.length > 0 && (
+            {/* Project Portfolio */}
+            {company.projects && company.projects.length > 0 && (
               <div className="bg-white rounded-xl shadow-lg p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Specialties</h2>
-                <div className="flex flex-wrap gap-2">
-                  {company.specialties.map((specialty, index) => (
-                    <span
-                      key={index}
-                      className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-secondary/10 text-secondary"
-                    >
-                      {specialty}
-                    </span>
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Project Portfolio</h2>
+                <div className="grid grid-cols-2 gap-4">
+                  {company.projects.map((project, index) => (
+                    <div key={index} className="relative">
+                      <div className="w-full h-32 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
+                        <ImageIcon className="h-8 w-8 text-gray-400" />
+                      </div>
+                      <div className="mt-2 text-sm text-gray-600 text-center">Project {index + 1}</div>
+                    </div>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* Certifications */}
-            {company.certifications && company.certifications.length > 0 && (
+            {/* Insurance & Bond */}
+            {company.insurance_bond && (
               <div className="bg-white rounded-xl shadow-lg p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Certifications</h2>
-                <div className="flex flex-wrap gap-2">
-                  {company.certifications.map((certification, index) => (
-                    <span
-                      key={index}
-                      className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800"
-                    >
-                      {certification}
-                    </span>
-                  ))}
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Insurance & Bond Certificate</h2>
+                <div className="flex items-center space-x-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <FileText className="h-6 w-6 text-green-600" />
+                  <span className="text-green-800">Certificate Available</span>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Sidebar */}
+          {/* Right Column - Basic Info, Social Media, Working Hours */}
           <div className="space-y-6">
-            {/* Contact Information */}
+            {/* Basic Information */}
             <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Contact Information</h3>
-              <div className="space-y-3">
-                {company.phone && (
-                  <div className="flex items-center space-x-3">
-                    <Phone className="h-5 w-5 text-gray-400" />
-                    <span className="text-gray-700">{company.phone}</span>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
+                  <p className="text-gray-900">{company.name}</p>
+                </div>
+                {company.description && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <p className="text-gray-900">{company.description}</p>
                   </div>
                 )}
-                {company.email && (
-                  <div className="flex items-center space-x-3">
-                    <Mail className="h-5 w-5 text-gray-400" />
-                    <span className="text-gray-700">{company.email}</span>
-                  </div>
-                )}
-                {company.address && (
-                  <div className="flex items-start space-x-3">
-                    <MapPin className="h-5 w-5 text-gray-400 mt-0.5" />
-                    <div className="text-gray-700">
-                      <div>{company.address}</div>
-                      {company.city && company.state && (
-                        <div>{company.city}, {company.state} {company.zip_code}</div>
-                      )}
-                    </div>
+                {company.website && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Website</label>
+                    <a 
+                      href={company.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:text-primary-dark"
+                    >
+                      {company.website}
+                    </a>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* Operating Hours */}
+            {/* Social Media Profiles */}
+            {(company.social_media.facebook || company.social_media.instagram || 
+              company.social_media.twitter || company.social_media.linkedin ||
+              company.social_media.thumbtack || company.social_media.yelp) && (
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Social Media Profiles</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {company.social_media.facebook && (
+                    <a 
+                      href={company.social_media.facebook}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center space-x-2 text-blue-600 hover:text-blue-700"
+                    >
+                      <Facebook className="h-5 w-5" />
+                      <span className="text-sm">Facebook</span>
+                    </a>
+                  )}
+                  {company.social_media.instagram && (
+                    <a 
+                      href={company.social_media.instagram}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center space-x-2 text-pink-600 hover:text-pink-700"
+                    >
+                      <Instagram className="h-5 w-5" />
+                      <span className="text-sm">Instagram</span>
+                    </a>
+                  )}
+                  {company.social_media.twitter && (
+                    <a 
+                      href={company.social_media.twitter}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center space-x-2 text-blue-400 hover:text-blue-500"
+                    >
+                      <Twitter className="h-5 w-5" />
+                      <span className="text-sm">Twitter</span>
+                    </a>
+                  )}
+                  {company.social_media.linkedin && (
+                    <a 
+                      href={company.social_media.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center space-x-2 text-blue-700 hover:text-blue-800"
+                    >
+                      <Linkedin className="h-5 w-5" />
+                      <span className="text-sm">LinkedIn</span>
+                    </a>
+                  )}
+                  {company.social_media.thumbtack && (
+                    <a 
+                      href={company.social_media.thumbtack}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center space-x-2 text-green-600 hover:text-green-700"
+                    >
+                      <Globe className="h-5 w-5" />
+                      <span className="text-sm">Thumbtack</span>
+                    </a>
+                  )}
+                  {company.social_media.yelp && (
+                    <a 
+                      href={company.social_media.yelp}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center space-x-2 text-red-600 hover:text-red-700"
+                    >
+                      <Globe className="h-5 w-5" />
+                      <span className="text-sm">Yelp</span>
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Working Hours */}
             <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Operating Hours</h3>
-              <div className="space-y-2">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Working Hours</h3>
+              <div className="space-y-3">
                 {Object.entries(company.operating_hours).map(([day, hours]) => (
                   <div key={day} className="flex justify-between items-center">
                     <span className="text-gray-700 capitalize">{day}</span>
@@ -315,52 +452,31 @@ export default function CompanyProfile() {
               </div>
             </div>
 
-            {/* Social Media */}
-            {(company.social_media.facebook || company.social_media.instagram || 
-              company.social_media.twitter || company.social_media.linkedin) && (
+            {/* Customer Reviews */}
+            {company.reviews && company.reviews.length > 0 && (
               <div className="bg-white rounded-xl shadow-lg p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Follow Us</h3>
-                <div className="flex space-x-3">
-                  {company.social_media.facebook && (
-                    <a 
-                      href={company.social_media.facebook}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-700"
-                    >
-                      <Facebook className="h-6 w-6" />
-                    </a>
-                  )}
-                  {company.social_media.instagram && (
-                    <a 
-                      href={company.social_media.instagram}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-pink-600 hover:text-pink-700"
-                    >
-                      <Instagram className="h-6 w-6" />
-                    </a>
-                  )}
-                  {company.social_media.twitter && (
-                    <a 
-                      href={company.social_media.twitter}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-400 hover:text-blue-500"
-                    >
-                      <Twitter className="h-6 w-6" />
-                    </a>
-                  )}
-                  {company.social_media.linkedin && (
-                    <a 
-                      href={company.social_media.linkedin}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-700 hover:text-blue-800"
-                    >
-                      <Linkedin className="h-6 w-6" />
-                    </a>
-                  )}
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Customer Reviews</h3>
+                <div className="space-y-4">
+                  {company.reviews.map((review, index) => (
+                    <div key={index} className="border-l-4 border-primary pl-4">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <div className="flex items-center space-x-1">
+                          {[...Array(5)].map((_, i) => (
+                            <Star 
+                              key={i} 
+                              className={`h-4 w-4 ${i < review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} 
+                            />
+                          ))}
+                        </div>
+                        <span className="text-sm text-gray-600">{review.rating}/5</span>
+                      </div>
+                      <p className="text-gray-700 text-sm mb-1">{review.comment}</p>
+                      <div className="flex items-center justify-between text-xs text-gray-500">
+                        <span>- {review.customer_name}</span>
+                        <span>{new Date(review.date).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}

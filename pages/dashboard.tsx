@@ -49,12 +49,21 @@ interface BusinessProfile {
     instagram: string;
     twitter: string;
     linkedin: string;
+    thumbtack: string;
+    yelp: string;
   };
   services: string[];
-  specialties: string[];
-  certifications: string[];
+  projects: string[];
+  insurance_bond: string;
+  reviews: Array<{
+    customer_name: string;
+    rating: number;
+    comment: string;
+    date: string;
+  }>;
   created_at: string;
   updated_at: string;
+  google_place_id?: string; // Added for Google Place ID
 }
 
 export default function Dashboard() {
@@ -67,9 +76,14 @@ export default function Dashboard() {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [newSpecialty, setNewSpecialty] = useState('');
-  const [newCertification, setNewCertification] = useState('');
   const [isEditing, setIsEditing] = useState(false);
+  const [projectPhotos, setProjectPhotos] = useState<File[]>([]);
+  const [insuranceFile, setInsuranceFile] = useState<File | null>(null);
+  const [newReview, setNewReview] = useState({
+    customer_name: '',
+    rating: 5,
+    comment: ''
+  });
 
   // Redirect if not authenticated
   useEffect(() => {
@@ -172,12 +186,16 @@ export default function Dashboard() {
         instagram: '',
         twitter: '',
         linkedin: '',
+        thumbtack: '',
+        yelp: '',
       },
       services: [],
-      specialties: [],
-      certifications: [],
+      projects: [],
+      insurance_bond: '',
+      reviews: [],
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
+      google_place_id: '', // Add default for google_place_id
     };
     
     setProfile({
@@ -256,7 +274,7 @@ export default function Dashboard() {
     } : null);
   };
 
-  const addItem = (field: 'services' | 'specialties' | 'certifications', value: string) => {
+  const addItem = (field: 'services' | 'projects' | 'reviews', value: string) => {
     if (!value.trim()) return;
     
     setProfile(prev => prev ? {
@@ -264,15 +282,53 @@ export default function Dashboard() {
       [field]: [...prev[field], value.trim()]
     } : null);
     
-    if (field === 'specialties') setNewSpecialty('');
-    if (field === 'certifications') setNewCertification('');
   };
 
-  const removeItem = (field: 'specialties' | 'certifications', index: number) => {
+  const removeItem = (field: 'projects' | 'reviews', index: number) => {
     setProfile(prev => prev ? {
       ...prev,
       [field]: prev[field].filter((_, i) => i !== index)
     } : null);
+  };
+
+  const handleProjectPhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (projectPhotos.length + files.length > 4) {
+      alert('You can only upload up to 4 project photos');
+      return;
+    }
+    setProjectPhotos(prev => [...prev, ...files]);
+  };
+
+  const removeProjectPhoto = (index: number) => {
+    setProjectPhotos(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleInsuranceUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setInsuranceFile(file);
+    }
+  };
+
+  const handleReviewChange = (field: string, value: string | number) => {
+    setNewReview(prev => ({ ...prev, [field]: value }));
+  };
+
+  const addReview = () => {
+    if (!newReview.customer_name.trim() || !newReview.comment.trim()) return;
+    
+    const review = {
+      ...newReview,
+      date: new Date().toISOString()
+    };
+    
+    setProfile(prev => prev ? {
+      ...prev,
+      reviews: [...prev.reviews, review]
+    } : null);
+    
+    setNewReview({ customer_name: '', rating: 5, comment: '' });
   };
 
   const saveProfile = async () => {
@@ -422,480 +478,848 @@ export default function Dashboard() {
           </div>
         )}
         
-
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Company Logo Upload */}
-          <div className="card">
-            <div className="flex items-center space-x-3 mb-4">
-              <Upload className="h-6 w-6 text-primary" />
-              <h2 className="text-xl font-semibold text-gray-900">Company Logo</h2>
-            </div>
-            
-            {profile?.logo_url && getLogoUrl(profile.logo_url) ? (
-              <div className="mb-4">
-                <img 
-                  src={getLogoUrl(profile.logo_url) || ''} 
-                  alt="Company Logo" 
-                  className="h-20 w-auto rounded-lg border border-gray-200"
-                  onError={(e) => {
-                    // Hide broken images
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                  }}
-                />
-              </div>
-            ) : (
-              <p className="text-gray-600 mb-4">No logo uploaded yet.</p>
-            )}
-
-            <div className="space-y-4">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleLogoUpload}
-                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary-dark"
-              />
-              {logoFile && (
-                <button
-                  onClick={uploadLogo}
-                  disabled={uploading}
-                  className="btn-primary w-full"
-                >
-                  {uploading ? 'Uploading...' : 'Upload Logo'}
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-
         {/* Business Profile Section */}
         {profile ? (
           <div className="mt-8">
             <div className="card">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-semibold text-gray-900">Business Profile</h2>
-                <div className="flex space-x-3">
-                  {isEditing ? (
-                    <>
-                      <button
-                        onClick={() => setIsEditing(false)}
-                        className="btn-secondary flex items-center space-x-2"
-                      >
-                        <X className="h-5 w-5" />
-                        <span>Cancel</span>
-                      </button>
-                      <button
-                        onClick={saveProfile}
-                        disabled={saving}
-                        className="btn-primary flex items-center space-x-2"
-                      >
-                        {saving ? (
-                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                        ) : (
-                          <Save className="h-5 w-5" />
-                        )}
-                        <span>{saving ? 'Saving...' : 'Save Profile'}</span>
-                      </button>
-                    </>
-                  ) : (
-                    <div className="flex space-x-3">
-                      <button
-                        onClick={() => setIsEditing(true)}
-                        className="btn-primary flex items-center space-x-2"
-                      >
-                        <Edit className="h-5 w-5" />
-                        <span>Edit Profile</span>
-                      </button>
-                      <button
-                        onClick={() => setShowDeleteConfirm(true)}
-                        className="btn-danger flex items-center space-x-2"
-                      >
-                        <Trash2 className="h-5 w-5" />
-                        <span>Delete Profile</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
+               <div className="flex items-center justify-between mb-6">
+                 <h2 className="text-2xl font-semibold text-gray-900">Business Profile</h2>
+               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Left Column - Basic Info */}
-                <div className="lg:col-span-1 space-y-6">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Company Name
-                        </label>
-                        <input
-                          type="text"
-                          autoComplete="organization"
-                          value={profile?.name ?? ''}
-                          onChange={(e) => handleInputChange('name', e.target.value)}
-                          className="input-field"
-                          placeholder="Enter company name"
-                          disabled={!isEditing}
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Description
-                        </label>
-                        <textarea
-                          value={profile?.description ?? ''}
-                          onChange={(e) => handleInputChange('description', e.target.value)}
-                          rows={4}
-                          className="input-field"
-                          placeholder="Describe your business and services"
-                          disabled={!isEditing}
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Website
-                        </label>
-                        <div className="relative">
-                          <Globe className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  {/* Left Column - Logo + Contact Info, Services */}
+                  <div className="space-y-6">
+                    {/* Logo and Contact Info Row */}
+                    <div className="flex items-start space-x-6">
+                      {/* Logo Upload */}
+                      <div className="flex-shrink-0">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Company Logo</h3>
+                        
+                        <div className="space-y-3">
+                          {profile?.logo_url && getLogoUrl(profile.logo_url) ? (
+                            <img 
+                              src={getLogoUrl(profile.logo_url) || ''} 
+                              alt="Company Logo" 
+                              className="h-20 w-auto rounded-lg border border-gray-200"
+                              onError={(e) => {
+                                // Hide broken images
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                              }}
+                            />
+                          ) : (
+                            <div className="h-20 w-20 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
+                              <span className="text-gray-400 text-xs">No Logo</span>
+                            </div>
+                          )}
+                          
                           <input
-                            type="url"
-                            autoComplete="url"
-                            value={profile?.website ?? ''}
-                            onChange={(e) => handleInputChange('website', e.target.value)}
-                            className="input-field pl-10"
-                            placeholder="https://your-website.com"
-                            disabled={!isEditing}
+                            type="file"
+                            accept="image/*"
+                            onChange={handleLogoUpload}
+                            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary-dark"
                           />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Right Column - Contact & Details */}
-                <div className="lg:col-span-2 space-y-6">
-                  {/* Contact Information */}
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Contact Information</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Phone Number
-                        </label>
-                        <div className="relative">
-                          <Phone className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                          <input
-                            type="tel"
-                            autoComplete="tel"
-                            value={profile.phone}
-                            onChange={(e) => handleInputChange('phone', e.target.value)}
-                            className="input-field pl-10"
-                            placeholder="(555) 123-4567"
-                            disabled={!isEditing}
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Email
-                        </label>
-                        <div className="relative">
-                          <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                          <input
-                            type="email"
-                            autoComplete="email"
-                            value={profile.email}
-                            onChange={(e) => handleInputChange('email', e.target.value)}
-                            className="input-field pl-10"
-                            placeholder="contact@company.com"
-                            disabled={!isEditing}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Address
-                        </label>
-                        <div className="relative">
-                          <MapPin className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                          <input
-                            type="text"
-                            value={profile.address}
-                            onChange={(e) => handleInputChange('address', e.target.value)}
-                            className="input-field pl-10"
-                            placeholder="123 Business St"
-                            disabled={!isEditing}
-                          />
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          City
-                        </label>
-                        <input
-                          type="text"
-                          value={profile.city}
-                          onChange={(e) => handleInputChange('city', e.target.value)}
-                          className="input-field"
-                          placeholder="City"
-                          disabled={!isEditing}
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          State
-                        </label>
-                        <input
-                          type="text"
-                          value={profile.state}
-                          onChange={(e) => handleInputChange('state', e.target.value)}
-                          className="input-field"
-                          placeholder="State"
-                          disabled={!isEditing}
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          ZIP Code
-                        </label>
-                        <input
-                          type="text"
-                          value={profile.zip_code}
-                          onChange={(e) => handleInputChange('zip_code', e.target.value)}
-                          className="input-field"
-                          placeholder="12345"
-                          disabled={!isEditing}
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Services & Specialties */}
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Services & Specialties</h3>
-                    <div className="space-y-4">
-                      {/* Services */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Services Offered
-                        </label>
-                        <div className="mb-4">
-                          <select
-                            multiple
-                            value={profile.services}
-                            onChange={(e) => {
-                              const selectedOptions = Array.from(e.target.selectedOptions, option => option.value);
-                              setProfile(prev => prev ? { ...prev, services: selectedOptions } : null);
-                            }}
-                            className="input-field min-h-[120px]"
-                            disabled={!isEditing}
-                          >
-                            <optgroup label="Cleaning & Maintenance">
-                              <option value="Cleaning">Cleaning</option>
-                              <option value="Commercial/office cleaning">Commercial/office cleaning</option>
-                              <option value="Carpet & upholstery cleaning">Carpet & upholstery cleaning</option>
-                              <option value="Window washing">Window washing</option>
-                              <option value="Pressure washing">Pressure washing</option>
-                            </optgroup>
-                            <optgroup label="Home Improvement & Repairs">
-                              <option value="Handyman services">Handyman services</option>
-                              <option value="Plumbing">Plumbing</option>
-                              <option value="Electrical services">Electrical services</option>
-                              <option value="HVAC installation & maintenance">HVAC installation & maintenance</option>
-                              <option value="Appliance repair">Appliance repair</option>
-                            </optgroup>
-                            <optgroup label="Outdoor & Property Services">
-                              <option value="Landscaping & lawn care">Landscaping & lawn care</option>
-                              <option value="Tree trimming & removal">Tree trimming & removal</option>
-                              <option value="Snow removal">Snow removal</option>
-                              <option value="Pool cleaning & maintenance">Pool cleaning & maintenance</option>
-                              <option value="Pest control">Pest control</option>
-                            </optgroup>
-                            <optgroup label="Specialized Home Care">
-                              <option value="Deep sanitation & disinfection services">Deep sanitation & disinfection services</option>
-                              <option value="Mold remediation">Mold remediation</option>
-                              <option value="Water damage restoration">Water damage restoration</option>
-                              <option value="Moving assistance (packing/unpacking)">Moving assistance (packing/unpacking)</option>
-                            </optgroup>
-                          </select>
-                          <p className="text-sm text-gray-500 mt-1">
-                            Hold Ctrl (or Cmd on Mac) to select multiple services
-                          </p>
-                        </div>
-
-                      </div>
-
-                      {/* Specialties */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Specialties
-                        </label>
-                        <div className="flex space-x-2 mb-2">
-                          <input
-                            type="text"
-                            value={newSpecialty}
-                            onChange={(e) => setNewSpecialty(e.target.value)}
-                            className="input-field flex-1"
-                            placeholder="Add a specialty"
-                            onKeyPress={(e) => e.key === 'Enter' && addItem('specialties', newSpecialty)}
-                            disabled={!isEditing}
-                          />
-                          <button
-                            onClick={() => addItem('specialties', newSpecialty)}
-                            className="btn-primary px-4"
-                            disabled={!isEditing}
-                          >
-                            Add
-                          </button>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          {profile.specialties.map((specialty, index) => (
-                            <span
-                              key={index}
-                              className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-secondary/10 text-secondary"
+                          {logoFile && (
+                            <button
+                              onClick={uploadLogo}
+                              disabled={uploading}
+                              className="btn-primary w-full"
                             >
-                              {specialty}
-                              <button
-                                onClick={() => removeItem('specialties', index)}
-                                className="ml-2 text-secondary hover:text-secondary-dark"
+                              {uploading ? 'Uploading...' : 'Upload Logo'}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Contact Information */}
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Contact Information</h3>
+                        <div className="space-y-3">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Phone Number
+                            </label>
+                            <div className="relative">
+                              <Phone className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                              <input
+                                type="tel"
+                                autoComplete="tel"
+                                value={profile.phone}
+                                onChange={(e) => handleInputChange('phone', e.target.value)}
+                                className="input-field pl-10"
+                                placeholder="(555) 123-4567"
                                 disabled={!isEditing}
-                              >
-                                ×
-                              </button>
-                            </span>
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Email
+                            </label>
+                            <div className="relative">
+                              <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                              <input
+                                type="email"
+                                autoComplete="email"
+                                value={profile.email}
+                                onChange={(e) => handleInputChange('email', e.target.value)}
+                                className="input-field pl-10"
+                                placeholder="contact@company.com"
+                                disabled={!isEditing}
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Address
+                            </label>
+                            <div className="relative">
+                              <MapPin className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                              <input
+                                type="text"
+                                value={profile.address}
+                                onChange={(e) => handleInputChange('address', e.target.value)}
+                                className="input-field pl-10"
+                                placeholder="123 Business St"
+                                disabled={!isEditing}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-3 gap-3">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                City
+                              </label>
+                              <input
+                                type="text"
+                                value={profile.city}
+                                onChange={(e) => handleInputChange('city', e.target.value)}
+                                className="input-field"
+                                placeholder="City"
+                                disabled={!isEditing}
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                State
+                              </label>
+                              <input
+                                type="text"
+                                value={profile.state}
+                                onChange={(e) => handleInputChange('state', e.target.value)}
+                                className="input-field"
+                                placeholder="State"
+                                disabled={!isEditing}
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                ZIP Code
+                              </label>
+                              <input
+                                type="text"
+                                value={profile.zip_code}
+                                onChange={(e) => handleInputChange('zip_code', e.target.value)}
+                                className="input-field"
+                                placeholder="12345"
+                                disabled={!isEditing}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Services */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Services Offered
+                      </label>
+                      <div className="mb-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-60 overflow-y-auto p-3 border border-gray-200 rounded-lg">
+                          <label className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={profile.services?.includes('Cleaning') || false}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setProfile(prev => prev ? { ...prev, services: [...(prev.services || []), 'Cleaning'] } : null);
+                                } else {
+                                  setProfile(prev => prev ? { ...prev, services: (prev.services || []).filter(s => s !== 'Cleaning') } : null);
+                                }
+                              }}
+                              className="rounded border-gray-300 text-primary focus:ring-primary"
+                              disabled={!isEditing}
+                            />
+                            <span className="text-sm text-gray-700">Cleaning</span>
+                          </label>
+                          
+                          <label className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={profile.services?.includes('Commercial/office cleaning')}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setProfile(prev => prev ? { ...prev, services: [...(prev.services || []), 'Commercial/office cleaning'] } : null);
+                                } else {
+                                  setProfile(prev => prev ? { ...prev, services: (prev.services || []).filter(s => s !== 'Commercial/office cleaning') } : null);
+                                }
+                              }}
+                              className="rounded border-gray-300 text-primary focus:ring-primary"
+                              disabled={!isEditing}
+                            />
+                            <span className="text-sm text-gray-700">Commercial/office cleaning</span>
+                          </label>
+                          
+                          <label className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={profile.services?.includes('Carpet & upholstery cleaning')}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setProfile(prev => prev ? { ...prev, services: [...(prev.services || []), 'Carpet & upholstery cleaning'] } : null);
+                                } else {
+                                  setProfile(prev => prev ? { ...prev, services: (prev.services || []).filter(s => s !== 'Carpet & upholstery cleaning') } : null);
+                                }
+                              }}
+                              className="rounded border-gray-300 text-primary focus:ring-primary"
+                              disabled={!isEditing}
+                            />
+                            <span className="text-sm text-gray-700">Carpet & upholstery cleaning</span>
+                          </label>
+                          
+                          <label className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={profile.services?.includes('Window washing')}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setProfile(prev => prev ? { ...prev, services: [...(prev.services || []), 'Window washing'] } : null);
+                                } else {
+                                  setProfile(prev => prev ? { ...prev, services: (prev.services || []).filter(s => s !== 'Window washing') } : null);
+                                }
+                              }}
+                              className="rounded border-gray-300 text-primary focus:ring-primary"
+                              disabled={!isEditing}
+                            />
+                            <span className="text-sm text-gray-700">Window washing</span>
+                          </label>
+                          
+                          <label className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={profile.services?.includes('Pressure washing')}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setProfile(prev => prev ? { ...prev, services: [...(prev.services || []), 'Pressure washing'] } : null);
+                                } else {
+                                  setProfile(prev => prev ? { ...prev, services: (prev.services || []).filter(s => s !== 'Pressure washing') } : null);
+                                }
+                              }}
+                              className="rounded border-gray-300 text-primary focus:ring-primary"
+                              disabled={!isEditing}
+                            />
+                            <span className="text-sm text-gray-700">Pressure washing</span>
+                          </label>
+                          
+                          <label className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={profile.services?.includes('Handyman services')}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setProfile(prev => prev ? { ...prev, services: [...(prev.services || []), 'Handyman services'] } : null);
+                                } else {
+                                  setProfile(prev => prev ? { ...prev, services: (prev.services || []).filter(s => s !== 'Handyman services') } : null);
+                                }
+                              }}
+                              className="rounded border-gray-300 text-primary focus:ring-primary"
+                              disabled={!isEditing}
+                            />
+                            <span className="text-sm text-gray-700">Handyman services</span>
+                          </label>
+                          
+                          <label className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={profile.services?.includes('Plumbing')}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setProfile(prev => prev ? { ...prev, services: [...(prev.services || []), 'Plumbing'] } : null);
+                                } else {
+                                  setProfile(prev => prev ? { ...prev, services: (prev.services || []).filter(s => s !== 'Plumbing') } : null);
+                                }
+                              }}
+                              className="rounded border-gray-300 text-primary focus:ring-primary"
+                              disabled={!isEditing}
+                            />
+                            <span className="text-sm text-gray-700">Plumbing</span>
+                          </label>
+                          
+                          <label className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={profile.services?.includes('Electrical services')}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setProfile(prev => prev ? { ...prev, services: [...(prev.services || []), 'Electrical services'] } : null);
+                                } else {
+                                  setProfile(prev => prev ? { ...prev, services: (prev.services || []).filter(s => s !== 'Electrical services') } : null);
+                                }
+                              }}
+                              className="rounded border-gray-300 text-primary focus:ring-primary"
+                              disabled={!isEditing}
+                            />
+                            <span className="text-sm text-gray-700">Electrical services</span>
+                          </label>
+                          
+                          <label className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={profile.services?.includes('HVAC installation & maintenance')}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setProfile(prev => prev ? { ...prev, services: [...(prev.services || []), 'HVAC installation & maintenance'] } : null);
+                                } else {
+                                  setProfile(prev => prev ? { ...prev, services: (prev.services || []).filter(s => s !== 'HVAC installation & maintenance') } : null);
+                                }
+                              }}
+                              className="rounded border-gray-300 text-primary focus:ring-primary"
+                              disabled={!isEditing}
+                            />
+                            <span className="text-sm text-gray-700">HVAC installation & maintenance</span>
+                          </label>
+                          
+                          <label className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={profile.services?.includes('Appliance repair')}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setProfile(prev => prev ? { ...prev, services: [...(prev.services || []), 'Appliance repair'] } : null);
+                                } else {
+                                  setProfile(prev => prev ? { ...prev, services: (prev.services || []).filter(s => s !== 'Appliance repair') } : null);
+                                }
+                              }}
+                              className="rounded border-gray-300 text-primary focus:ring-primary"
+                              disabled={!isEditing}
+                            />
+                            <span className="text-sm text-gray-700">Appliance repair</span>
+                          </label>
+                          
+                          <label className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={profile.services?.includes('Landscaping & lawn care')}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setProfile(prev => prev ? { ...prev, services: [...(prev.services || []), 'Landscaping & lawn care'] } : null);
+                                } else {
+                                  setProfile(prev => prev ? { ...prev, services: (prev.services || []).filter(s => s !== 'Landscaping & lawn care') } : null);
+                                }
+                              }}
+                              className="rounded border-gray-300 text-primary focus:ring-primary"
+                              disabled={!isEditing}
+                            />
+                            <span className="text-sm text-gray-700">Landscaping & lawn care</span>
+                          </label>
+                          
+                          <label className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={profile.services?.includes('Tree trimming & removal')}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setProfile(prev => prev ? { ...prev, services: [...(prev.services || []), 'Tree trimming & removal'] } : null);
+                                } else {
+                                  setProfile(prev => prev ? { ...prev, services: (prev.services || []).filter(s => s !== 'Tree trimming & removal') } : null);
+                                }
+                              }}
+                              className="rounded border-gray-300 text-primary focus:ring-primary"
+                              disabled={!isEditing}
+                            />
+                            <span className="text-sm text-gray-700">Tree trimming & removal</span>
+                          </label>
+                          
+                          <label className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={profile.services?.includes('Snow removal')}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setProfile(prev => prev ? { ...prev, services: [...(prev.services || []), 'Snow removal'] } : null);
+                                } else {
+                                  setProfile(prev => prev ? { ...prev, services: (prev.services || []).filter(s => s !== 'Snow removal') } : null);
+                                }
+                              }}
+                              className="rounded border-gray-300 text-primary focus:ring-primary"
+                              disabled={!isEditing}
+                            />
+                            <span className="text-sm text-gray-700">Snow removal</span>
+                          </label>
+                          
+                          <label className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={profile.services?.includes('Pool cleaning & maintenance')}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setProfile(prev => prev ? { ...prev, services: [...(prev.services || []), 'Pool cleaning & maintenance'] } : null);
+                                } else {
+                                  setProfile(prev => prev ? { ...prev, services: (prev.services || []).filter(s => s !== 'Pool cleaning & maintenance') } : null);
+                                }
+                              }}
+                              className="rounded border-gray-300 text-primary focus:ring-primary"
+                              disabled={!isEditing}
+                            />
+                            <span className="text-sm text-gray-700">Pool cleaning & maintenance</span>
+                          </label>
+                          
+                          <label className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={profile.services?.includes('Pest control')}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setProfile(prev => prev ? { ...prev, services: [...(prev.services || []), 'Pest control'] } : null);
+                                } else {
+                                  setProfile(prev => prev ? { ...prev, services: (prev.services || []).filter(s => s !== 'Pest control') } : null);
+                                }
+                              }}
+                              className="rounded border-gray-300 text-primary focus:ring-primary"
+                              disabled={!isEditing}
+                            />
+                            <span className="text-sm text-gray-700">Pest control</span>
+                          </label>
+                          
+                          <label className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={profile.services?.includes('Deep sanitation & disinfection services')}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setProfile(prev => prev ? { ...prev, services: [...(prev.services || []), 'Deep sanitation & disinfection services'] } : null);
+                                } else {
+                                  setProfile(prev => prev ? { ...prev, services: (prev.services || []).filter(s => s !== 'Deep sanitation & disinfection services') } : null);
+                                }
+                              }}
+                              className="rounded border-gray-300 text-primary focus:ring-primary"
+                              disabled={!isEditing}
+                            />
+                            <span className="text-sm text-gray-700">Deep sanitation & disinfection services</span>
+                          </label>
+                          
+                          <label className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={profile.services?.includes('Mold remediation')}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setProfile(prev => prev ? { ...prev, services: [...(prev.services || []), 'Mold remediation'] } : null);
+                                } else {
+                                  setProfile(prev => prev ? { ...prev, services: (prev.services || []).filter(s => s !== 'Mold remediation') } : null);
+                                }
+                              }}
+                              className="rounded border-gray-300 text-primary focus:ring-primary"
+                              disabled={!isEditing}
+                            />
+                            <span className="text-sm text-gray-700">Mold remediation</span>
+                          </label>
+                          
+                          <label className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={profile.services?.includes('Water damage restoration')}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setProfile(prev => prev ? { ...prev, services: [...(prev.services || []), 'Water damage restoration'] } : null);
+                                } else {
+                                  setProfile(prev => prev ? { ...prev, services: (prev.services || []).filter(s => s !== 'Water damage restoration') } : null);
+                                }
+                              }}
+                              className="rounded border-gray-300 text-primary focus:ring-primary"
+                              disabled={!isEditing}
+                            />
+                            <span className="text-sm text-gray-700">Water damage restoration</span>
+                          </label>
+                          
+                          <label className="flex items-center space-x-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={profile.services?.includes('Moving assistance (packing/unpacking)')}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setProfile(prev => prev ? { ...prev, services: [...(prev.services || []), 'Moving assistance (packing/unpacking)'] } : null);
+                                } else {
+                                  setProfile(prev => prev ? { ...prev, services: (prev.services || []).filter(s => s !== 'Moving assistance (packing/unpacking)') } : null);
+                                }
+                              }}
+                              className="rounded border-gray-300 text-primary focus:ring-primary"
+                              disabled={!isEditing}
+                            />
+                            <span className="text-sm text-gray-700">Moving assistance (packing/unpacking)</span>
+                          </label>
+                        </div>
+                        <p className="text-sm text-gray-500 mt-2">
+                          Click the checkboxes to select the services you offer
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column - Basic Info, Social Media, Projects, Insurance, Working Hours */}
+                  <div className="space-y-6">
+                    {/* Basic Information */}
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Company Name
+                          </label>
+                          <input
+                            type="text"
+                            autoComplete="organization"
+                            value={profile?.name ?? ''}
+                            onChange={(e) => handleInputChange('name', e.target.value)}
+                            className="input-field"
+                            placeholder="Enter company name"
+                            disabled={!isEditing}
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Description
+                          </label>
+                          <textarea
+                            value={profile?.description ?? ''}
+                            onChange={(e) => handleInputChange('description', e.target.value)}
+                            rows={4}
+                            className="input-field"
+                            placeholder="Describe your business and services"
+                            disabled={!isEditing}
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Website
+                          </label>
+                          <div className="relative">
+                            <Globe className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                            <input
+                              type="url"
+                              autoComplete="url"
+                              value={profile?.website ?? ''}
+                              onChange={(e) => handleInputChange('website', e.target.value)}
+                              className="input-field pl-10"
+                              placeholder="https://your-website.com"
+                              disabled={!isEditing}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Social Media Profiles */}
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Social Media Profiles</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Facebook
+                          </label>
+                          <div className="relative">
+                            <Facebook className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                            <input
+                              type="url"
+                              value={profile.social_media?.facebook || ''}
+                              onChange={(e) => handleSocialMediaChange('facebook', e.target.value)}
+                              className="input-field pl-10"
+                              placeholder="https://facebook.com/yourpage"
+                              disabled={!isEditing}
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Instagram
+                          </label>
+                          <div className="relative">
+                            <Instagram className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                            <input
+                              type="url"
+                              value={profile.social_media?.instagram || ''}
+                              onChange={(e) => handleSocialMediaChange('instagram', e.target.value)}
+                              className="input-field pl-10"
+                              placeholder="https://instagram.com/yourpage"
+                              disabled={!isEditing}
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Twitter
+                          </label>
+                          <div className="relative">
+                            <Twitter className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                            <input
+                              type="url"
+                              value={profile.social_media?.twitter || ''}
+                              onChange={(e) => handleSocialMediaChange('twitter', e.target.value)}
+                              className="input-field pl-10"
+                              placeholder="https://twitter.com/yourpage"
+                              disabled={!isEditing}
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            LinkedIn
+                          </label>
+                          <div className="relative">
+                            <Linkedin className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                            <input
+                              type="url"
+                              value={profile.social_media?.linkedin || ''}
+                              onChange={(e) => handleSocialMediaChange('linkedin', e.target.value)}
+                              className="input-field pl-10"
+                              placeholder="https://linkedin.com/company/yourcompany"
+                              disabled={!isEditing}
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Thumbtack
+                          </label>
+                          <div className="relative">
+                            <Globe className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                            <input
+                              type="url"
+                              value={profile.social_media?.thumbtack || ''}
+                              onChange={(e) => handleSocialMediaChange('thumbtack', e.target.value)}
+                              className="input-field pl-10"
+                              placeholder="https://thumbtack.com/profile/yourbusiness"
+                              disabled={!isEditing}
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Yelp
+                          </label>
+                          <div className="relative">
+                            <Globe className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                            <input
+                              type="url"
+                              value={profile.social_media?.yelp || ''}
+                              onChange={(e) => handleSocialMediaChange('yelp', e.target.value)}
+                              className="input-field pl-10"
+                              placeholder="https://yelp.com/biz/yourbusiness"
+                              disabled={!isEditing}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Projects Portfolio */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Project Portfolio (Max 4 Photos)
+                      </label>
+                      <div className="mb-4">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={handleProjectPhotoUpload}
+                          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary-dark"
+                          disabled={!isEditing || projectPhotos.length >= 4}
+                        />
+                        <p className="text-sm text-gray-500 mt-1">
+                          Upload photos of your completed projects (max 4)
+                        </p>
+                      </div>
+                      
+                      {/* Display Project Photos */}
+                      {projectPhotos.length > 0 && (
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                          {projectPhotos.map((photo, index) => (
+                            <div key={index} className="relative">
+                              <img
+                                src={URL.createObjectURL(photo)}
+                                alt={`Project ${index + 1}`}
+                                className="w-full h-32 object-cover rounded-lg border border-gray-200"
+                              />
+                              {isEditing && (
+                                <button
+                                  onClick={() => removeProjectPhoto(index)}
+                                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-red-600"
+                                >
+                                  ×
+                                </button>
+                              )}
+                            </div>
                           ))}
                         </div>
-                      </div>
-
-                      {/* Certifications */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Certifications
-                        </label>
-                        <div className="flex space-x-2 mb-2">
-                          <input
-                            type="text"
-                            value={newCertification}
-                            onChange={(e) => setNewCertification(e.target.value)}
-                            className="input-field flex-1"
-                            placeholder="Add a certification"
-                            onKeyPress={(e) => e.key === 'Enter' && addItem('certifications', newCertification)}
-                            disabled={!isEditing}
-                          />
-                          <button
-                            onClick={() => addItem('certifications', newCertification)}
-                            className="btn-primary px-4"
-                            disabled={!isEditing}
-                          >
-                            Add
-                          </button>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          {profile.certifications.map((certification, index) => (
-                            <span
-                              key={index}
-                              className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-100 text-green-800"
-                            >
-                              {certification}
-                              <button
-                                onClick={() => removeItem('certifications', index)}
-                                className="ml-2 text-green-600 hover:text-green-800"
-                                disabled={!isEditing}
-                              >
-                                ×
-                              </button>
-                            </span>
-                          ))}
-                        </div>
-                      </div>
+                      )}
                     </div>
-                  </div>
 
-                  {/* Social Media Profiles */}
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Social Media Profiles</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Facebook
-                        </label>
-                        <div className="relative">
-                          <Facebook className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                          <input
-                            type="url"
-                            value={profile.social_media?.facebook || ''}
-                            onChange={(e) => handleSocialMediaChange('facebook', e.target.value)}
-                            className="input-field pl-10"
-                            placeholder="https://facebook.com/yourpage"
-                            disabled={!isEditing}
-                          />
-                        </div>
+                    {/* Insurance & Bond */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Insurance or Bond Certificate
+                      </label>
+                      <div className="mb-4">
+                        <input
+                          type="file"
+                          accept=".pdf,.jpg,.jpeg,.png"
+                          onChange={handleInsuranceUpload}
+                          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-white hover:file:bg-primary-dark"
+                          disabled={!isEditing}
+                        />
+                        <p className="text-sm text-gray-500 mt-1">
+                          Upload your insurance certificate or bond documentation
+                        </p>
                       </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Instagram
-                        </label>
-                        <div className="relative">
-                          <Instagram className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                          <input
-                            type="url"
-                            value={profile.social_media?.instagram || ''}
-                            onChange={(e) => handleSocialMediaChange('instagram', e.target.value)}
-                            className="input-field pl-10"
-                            placeholder="https://instagram.com/yourpage"
-                            disabled={!isEditing}
-                          />
+                      
+                      {insuranceFile && (
+                        <div className="flex items-center space-x-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                          <span className="text-green-600">✓</span>
+                          <span className="text-sm text-green-800">{insuranceFile.name}</span>
                         </div>
-                      </div>
+                      )}
+                    </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Twitter
-                        </label>
-                        <div className="relative">
-                          <Twitter className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                          <input
-                            type="url"
-                            value={profile.social_media?.twitter || ''}
-                            onChange={(e) => handleSocialMediaChange('twitter', e.target.value)}
-                            className="input-field pl-10"
-                            placeholder="https://twitter.com/yourpage"
-                            disabled={!isEditing}
-                          />
-                        </div>
-                      </div>
+                    {/* Google Review Button */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Customer Reviews
+                      </label>
+                      <p className="text-sm text-gray-500 mb-3">
+                        Encourage your customers to leave reviews on Google
+                      </p>
+                      <button
+                        onClick={() => {
+                          const googleReviewUrl = `https://search.google.com/local/writereview?placeid=${profile?.google_place_id || ''}`;
+                          if (profile?.google_place_id) {
+                            window.open(googleReviewUrl, '_blank');
+                          } else {
+                            alert('Please add your Google Place ID to enable direct review links');
+                          }
+                        }}
+                        className="btn-primary w-full flex items-center justify-center space-x-2"
+                        disabled={!isEditing}
+                      >
+                        <Globe className="h-5 w-5" />
+                        <span>Get Google Reviews</span>
+                      </button>
+                      <p className="text-xs text-gray-500 mt-2">
+                        Share this link with your customers to collect reviews
+                      </p>
+                    </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          LinkedIn
-                        </label>
-                        <div className="relative">
-                          <Linkedin className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                          <input
-                            type="url"
-                            value={profile.social_media?.linkedin || ''}
-                            onChange={(e) => handleSocialMediaChange('linkedin', e.target.value)}
-                            className="input-field pl-10"
-                            placeholder="https://linkedin.com/company/yourcompany"
-                            disabled={!isEditing}
-                          />
-                        </div>
+                    {/* Working Hours */}
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Working Hours</h3>
+                      <div className="space-y-3">
+                        {Object.entries(profile.operating_hours).map(([day, hours]) => (
+                          <div key={day} className="flex items-center space-x-3">
+                            <div className="w-20 text-sm font-medium text-gray-700 capitalize">
+                              {day}
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <input
+                                type="time"
+                                value={hours.open}
+                                onChange={(e) => handleOperatingHoursChange(day, 'open', e.target.value)}
+                                className="input-field text-sm w-24"
+                                disabled={!isEditing || hours.closed}
+                              />
+                              <span className="text-gray-500">to</span>
+                              <input
+                                type="time"
+                                value={hours.close}
+                                onChange={(e) => handleOperatingHoursChange(day, 'close', e.target.value)}
+                                className="input-field text-sm w-24"
+                                disabled={!isEditing || hours.closed}
+                              />
+                            </div>
+                            <label className="flex items-center space-x-2">
+                              <input
+                                type="checkbox"
+                                checked={hours.closed}
+                                onChange={(e) => handleOperatingHoursChange(day, 'closed', e.target.checked)}
+                                className="rounded border-gray-300 text-primary focus:ring-primary"
+                                disabled={!isEditing}
+                              />
+                              <span className="text-sm text-gray-600">Closed</span>
+                            </label>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
+
+               {/* Action Buttons - Moved to Bottom */}
+               <div className="flex items-center justify-end space-x-3 mt-8 pt-6 border-t border-gray-200">
+                 {isEditing ? (
+                   <>
+                     <button
+                       onClick={() => setIsEditing(false)}
+                       className="btn-secondary flex items-center space-x-2"
+                     >
+                       <X className="h-5 w-5" />
+                       <span>Cancel</span>
+                     </button>
+                     <button
+                       onClick={saveProfile}
+                       disabled={saving}
+                       className="btn-primary flex items-center space-x-2"
+                     >
+                       {saving ? (
+                         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                       ) : (
+                         <Save className="h-5 w-5" />
+                       )}
+                       <span>{saving ? 'Saving...' : 'Save Profile'}</span>
+                     </button>
+                   </>
+                 ) : (
+                   <div className="flex space-x-3">
+                     <button
+                       onClick={() => setIsEditing(true)}
+                       className="btn-primary flex items-center space-x-2"
+                     >
+                       <Edit className="h-5 w-5" />
+                       <span>Edit Profile</span>
+                     </button>
+                     <button
+                       onClick={() => setShowDeleteConfirm(true)}
+                       className="btn-danger flex items-center space-x-2"
+                     >
+                       <Trash2 className="h-5 w-5" />
+                       <span>Delete Profile</span>
+                     </button>
+                   </div>
+                 )}
+               </div>
+             </div>
+           </div>
         ) : (
           <div className="mt-8">
             <div className="card">
